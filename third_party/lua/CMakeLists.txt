@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.22)
 
 # Параметры проекта
-project(Lua
+project(lua
         LANGUAGES C CXX)
 
 set(CMAKE_C_STANDARD 11)

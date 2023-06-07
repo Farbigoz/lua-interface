@@ -55,7 +55,7 @@ target_link_libraries(test
         Qt::Gui
         Qt::Widgets
 
-        Lua
+        lua
 )
 
 

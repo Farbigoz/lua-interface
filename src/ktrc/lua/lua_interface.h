@@ -5,20 +5,11 @@
 #include <map>
 #include <list>
 
-#include "defs/ars.h"
-#include "defs/trc3.h"
+#include "ktrc/defs/ars.h"
+#include "ktrc/defs/trc3.h"
+#include "ktrc/defs/can.h"
 
-#include "ktrcDefs.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <lua.h>
-
-#ifdef __cplusplus
-}
-#endif
+#include "lua_ulib.h"
 
 
 #define INTERFACE_STR				"interface"
@@ -159,12 +150,12 @@ typedef struct {
  * 			  value = (0x587f >> 0) & ((1 << 1) - 1);        // = 1
  */
 typedef struct {
-	uint8_t		pos;						///< Позиция начала считывания (С этого бита будет производиться считывание)
-	uint8_t		len;						///< Количество бит для считывания
-	uint8_t		input;						///< Номер входа для записи (в `InterfaceInputType`)
-	uint8_t		d;							///< Значение по-умолчанию
-	uint16_t	timeout;					///< Таймаут получения сообщения в милисекундах. При превышении: input = d
-	uint32_t	lastReceiveTime;			///< Время последнего получения сообщения
+	uint8_t				pos;				///< Позиция начала считывания (С этого бита будет производиться считывание)
+	uint8_t				len;				///< Количество бит для считывания
+	uint8_t				input;				///< Номер входа для записи (в `InterfaceInputType`)
+	uint8_t				d;					///< Значение по-умолчанию
+	uint16_t			timeout;			///< Таймаут получения сообщения в милисекундах. При превышении: input = d
+	LUA_LIB_TIME_T		lastRxTime;			///< Время последнего получения сообщения
 } CanMapperNodeStruct;
 
 
@@ -180,29 +171,39 @@ typedef std::map<uint32_t, std::list<CanMapperNodeStruct>>	InterfaceCanMapperTyp
 typedef std::map<uint8_t, uint8_t>							InterfaceCanInputType;
 
 
-
-
-/**
- * @brief	Создание библиотеки - интерфейса
- */
-int luaopen_interface(lua_State *L);
-
-
-
-void interface_can_mapper_handle(CAN_Message *msg);
-
-
-
-extern InterfaceTrc3GenStruct		INTERFACE_TRC3_GEN;
-extern InterfaceTrc3RecStruct		INTERFACE_TRC3_REC;
-extern InterfaceArsGenStruct		INTERFACE_ARS_GEN;
-extern InterfaceCanMapperType		INTERFACE_CAN_MAPPER;
-extern InterfaceCanInputType		INTERFACE_CAN_INPUT;
+typedef struct {
+	InterfaceCanMapperType		*canMapper;
+	InterfaceCanInputType		*canInput;
+} InterfaceCanUData;
 
 
 
 
+class LuaLib_Interface {
+private:
+	lua_State *luaState;
 
+	void init_trc3Gen();
+
+	void init_trc3Rec();
+
+	void init_arsGen();
+
+	void init_canMapper();
+
+public:
+	InterfaceTrc3GenStruct		trc3Gen;
+	InterfaceTrc3RecStruct		trc3Rec;
+	InterfaceArsGenStruct		arsGen;
+	InterfaceCanMapperType		canMapper;
+	InterfaceCanInputType		canInput;
+
+	void InitLib(lua_State *L);
+
+	void CanHandler(CAN_Message *msg);
+
+	void CanUpdateTimeouts();
+};
 
 
 

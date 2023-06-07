@@ -1,16 +1,4 @@
-#include "lua_defs.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <lauxlib.h>
-#include <lua.h>
-#include <lualib.h>
-
-#ifdef __cplusplus
-}
-#endif
+#include "ktrc/lua/lua_defs.h"
 
 
 // Функции библиотеки
@@ -20,13 +8,13 @@ static const struct luaL_Reg defsLib_func[] = {
 
 
 
-int luaopen_defs(lua_State *L) {
-	// Стек: [<string(arg1): lib name>]
+void LuaLib_Defs::InitLib(lua_State *L) {
+	// Стек: [...]
 
-	// Создание библиотеки
-	luaL_newlib(L, defsLib_func);
+	luaState = L;
+
+	LuaLib_CreateLib(luaState, DEFS_STR, defsLib_func);
 	// +1 // Стек: [..., <table: library>]
-
 
 	auto it = DEFS_LIB_FIELDS.begin();
 	for (; it != DEFS_LIB_FIELDS.end(); it++) {
@@ -39,6 +27,6 @@ int luaopen_defs(lua_State *L) {
 		// -1 // Стек: [..., <table: library>]
 	}
 
-
-	return 1;
+	lua_pop(L, 1);
+	// -1 // Стек: [...]
 }

@@ -4,23 +4,18 @@
 #include <string>
 #include <map>
 
-#include "defs/trc3.h"
-#include "defs/ars.h"
+#include "ktrc/defs/trc3.h"
+#include "ktrc/defs/ars.h"
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <lua.h>
-
-#ifdef __cplusplus
-}
-#endif
+#include "lua_ulib.h"
 
 
 
+#define DEFS_STR	"defs"
 
-static const std::map	<std::string, int>DEFS_LIB_FIELDS = {
+
+
+static const std::map	<std::string, int> DEFS_LIB_FIELDS = {
 		{"F_420_HZ",		F_420_HZ},
 		{"F_480_HZ",		F_480_HZ},
 		{"F_565_HZ",		F_565_HZ},
@@ -29,16 +24,19 @@ static const std::map	<std::string, int>DEFS_LIB_FIELDS = {
 
 		{"F_8_HZ",			F_8_HZ},
 		{"F_12_HZ",			F_12_HZ},
+
+		{"MAX_TIME",		LUA_LIB_MAX_TIME}
 };
 
 
 
+class LuaLib_Defs {
+private:
+	lua_State *luaState;
 
-/**
- * @brief	Создание библиотеки
- */
-int luaopen_defs(lua_State *L);
-
+public:
+	void InitLib(lua_State *L);
+};
 
 
 

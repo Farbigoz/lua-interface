@@ -1,19 +1,6 @@
 #include "iostream"
 
-#include "lua_interface.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include <lua.h>
-#include <lualib.h>
-#include <lauxlib.h>
-
-#ifdef __cplusplus
-}
-#endif
-
+#include "ktrc/lua/lua_interface.h"
 
 
 
@@ -23,18 +10,7 @@ void dumpstack (lua_State *L);
 
 
 
-
-// Функции библиотеки
-const struct luaL_Reg interfaceLib_func[] = {
-		{NULL, NULL}
-};
-
-
-
 // --------------------------------------------- Интерфейс генератора ТРЦ3 ---------------------------------------------
-
-// Интерфейс генератора ТРЦ3
-InterfaceTrc3GenStruct		INTERFACE_TRC3_GEN		= {0, };
 
 /**
  * @brief	Callback API функция запроса значения поля генератора ТРЦ3
@@ -47,22 +23,22 @@ InterfaceTrc3GenStruct		INTERFACE_TRC3_GEN		= {0, };
 int interface_trc3Gen_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto trc3Gen = (InterfaceTrc3GenStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
+	auto trc3Gen = *((InterfaceTrc3GenStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_TRC3_GEN_LEVEL)			// x = interface.level
 	{
-		lua_pushinteger(L, (*trc3Gen)->level);
+		lua_pushinteger(L, trc3Gen->level);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_TRC3_GEN_CARRIER)		// x = interface.carrier
 	{
-		lua_pushinteger(L, (*trc3Gen)->carrier);
+		lua_pushinteger(L, trc3Gen->carrier);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_TRC3_GEN_MOD)			// x = interface.mod
 	{
-		lua_pushinteger(L, (*trc3Gen)->mod);
+		lua_pushinteger(L, trc3Gen->mod);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else
@@ -86,23 +62,23 @@ int interface_trc3Gen_api_getField(lua_State *L) {
 int interface_trc3Gen_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto trc3Gen = (InterfaceTrc3GenStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
+	auto trc3Gen = *((InterfaceTrc3GenStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_TRC3_GEN_LEVEL)			// interface.level = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->level = value;
+		trc3Gen->level = value;
 	}
 	else if (key == INTERFACE_TRC3_GEN_CARRIER)		// interface.carrier = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->carrier = (TTrc3FreqNum)value;
+		trc3Gen->carrier = (TTrc3FreqNum)value;
 	}
 	else if (key == INTERFACE_TRC3_GEN_MOD)			// interface.mod = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->mod = (TTrc3ModFreqNum)value;
+		trc3Gen->mod = (TTrc3ModFreqNum)value;
 
 	}
 
@@ -120,51 +96,47 @@ const struct luaL_Reg interface_trc3Gen_functions[] = {
  * @brief	Инициализация интерфейса генератора ТРЦ3
  * @note	На вершине стека должна быть таблица для записи в неё интерфейса (библиотека = таблица)
  */
-void interface_trc3Gen_init(lua_State *L) {
+void LuaLib_Interface::init_trc3Gen() {
 	// Стек: [..., <table: library>]
 
-	INTERFACE_TRC3_GEN = {0, };
+	trc3Gen = {0, };
 
 	// ======================== Метатаблицы ========================
 
 	// Создание метатаблицы интерфейса генератора ТРЦ
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_trc3Gen_functions, 0);
+	luaL_setfuncs(luaState, interface_trc3Gen_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// =============================================================
 
 	// Создание пользовательских данных
-	auto map = (void **)lua_newuserdata(L, sizeof(size_t));
-	*map = &INTERFACE_TRC3_GEN;
+	auto map = (void **)lua_newuserdata(luaState, sizeof(size_t));
+	*map = &trc3Gen;
 	// +1 // Стек: [..., <table: library>, <userdata>]
 
 	// Получение метатаблицы интерфейса генератора ТРЦ
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_TRC3_GEN_NAME));
 	// +1 // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в пользовательские данные
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <userdata>]
 
 	// Установка пользовательских данных как поле библиотеки
-	lua_setfield(L, -2, INTERFACE_TRC3_GEN_NAME);
+	lua_setfield(luaState, -2, INTERFACE_TRC3_GEN_NAME);
 	// -1 // Стек: [..., <table: library>]
 }
 
 
-
-
 // --------------------------------------------- Интерфейс приёмников ТРЦ3 ---------------------------------------------
-
-InterfaceTrc3RecStruct		INTERFACE_TRC3_REC		= {0, };
 
 /**
  * @brief	Callback API функция запроса значения поля приёмника ТРЦ3
@@ -177,27 +149,27 @@ InterfaceTrc3RecStruct		INTERFACE_TRC3_REC		= {0, };
 int interface_trc3Rec_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto trc3Gen = (InterfaceTrc3RecStruct::RecStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
+	auto trc3Rec = *((InterfaceTrc3RecStruct::RecStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_TRC3_REC_LEVEL)			// x = interface[i].level
 	{
-		lua_pushinteger(L, (*trc3Gen)->level);
+		lua_pushinteger(L, trc3Rec->level);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_TRC3_REC_CARRIER)		// x = interface[i].carrier
 	{
-		lua_pushinteger(L, (*trc3Gen)->carrier);
+		lua_pushinteger(L, trc3Rec->carrier);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_TRC3_REC_MOD)			// x = interface[i].mod
 	{
-		lua_pushinteger(L, (*trc3Gen)->mod);
+		lua_pushinteger(L, trc3Rec->mod);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_TRC3_REC_TC)			// interface[i].mod = x
 	{
-		lua_pushinteger(L, (*trc3Gen)->tc);
+		lua_pushinteger(L, trc3Rec->tc);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else
@@ -221,23 +193,23 @@ int interface_trc3Rec_api_getField(lua_State *L) {
 int interface_trc3Rec_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto trc3Gen = (InterfaceTrc3RecStruct::RecStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
+	auto trc3Rec = *((InterfaceTrc3RecStruct::RecStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_TRC3_REC_LEVEL)			// interface[i].level = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->level = value;
+		trc3Rec->level = value;
 	}
 	else if (key == INTERFACE_TRC3_REC_CARRIER)		// interface[i].carrier = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->carrier = (TTrc3FreqNum)value;
+		trc3Rec->carrier = (TTrc3FreqNum)value;
 	}
 	else if (key == INTERFACE_TRC3_REC_MOD)			// interface[i].mod = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		(*trc3Gen)->mod = (TTrc3ModFreqNum)value;
+		trc3Rec->mod = (TTrc3ModFreqNum)value;
 	}
 
 	return 0;	// Возвращаемых элементов - 0
@@ -254,97 +226,95 @@ const struct luaL_Reg interface_trc3Rec_functions[] = {
  * @brief	Инициализация интерфейса приёмников ТРЦ3
  * @note	На вершине стека должна быть таблица для записи в неё интерфейса (библиотека = таблица)
  */
-void interface_trc3Rec_init(lua_State *L) {
+void LuaLib_Interface::init_trc3Rec() {
 	// Стек: [..., <table: library>]
 
-	INTERFACE_TRC3_REC = {0, };
+	trc3Rec = {0, };
 
 	// ======================== Метатаблицы ========================
 
 	// Создание метатаблицы для приёмников
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_trc3Rec_functions, 0);
+	luaL_setfuncs(luaState, interface_trc3Rec_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// =============================================================
 
 	// Создание таблицы приёмников
-	lua_createtable(L, INTERFACE_TRC3_REC_COUNT, 0);
+	lua_createtable(luaState, INTERFACE_TRC3_REC_COUNT, 0);
 	// +1 // Стек: [..., <table: library>, <table>]
 
 	// Заполнение массива приёмников
 	for (int i = 0; i < INTERFACE_TRC3_REC_COUNT; i++) {
 
 		// Создание пользовательских данных
-		auto map = (void **) lua_newuserdata(L, sizeof(size_t));
-		*map = &INTERFACE_TRC3_REC.rec[i];
+		auto map = (void **) lua_newuserdata(luaState, sizeof(size_t));
+		*map = &trc3Rec.rec[i];
 		// +1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 		// Получение метатаблицы
-		luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
+		luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_TRC3_REC_NAME));
 		// +1 // Стек: [..., <table: library>, <table>, <userdata>, <metatable>]
 
 		// Установка метатаблицы в пользовательские данные
-		lua_setmetatable(L, -2);
+		lua_setmetatable(luaState, -2);
 		// -1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 		// Добавление пользовательских данных в таблицу приёмников
-		lua_rawseti(L, -2, i + 1);
+		lua_rawseti(luaState, -2, i + 1);
 		// -1 // Стек: [..., <table: library>,  <table>]
 	}
 
 	// Установка таблицы как поля библиотеки
-	lua_setfield(L, -2, INTERFACE_TRC3_REC_NAME);
+	lua_setfield(luaState, -2, INTERFACE_TRC3_REC_NAME);
 	// -1 // Стек: [..., <table: library>]
 }
 
 
 // --------------------------------------------- Интерфейс генератора АРС ----------------------------------------------
 
-InterfaceArsGenStruct		INTERFACE_ARS_GEN		= {0, };
-
 
 int interface_arsGen_level_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto level = (InterfaceArsGenStruct::LevelStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
+	auto level = *((InterfaceArsGenStruct::LevelStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.level.f75
 	{
-		lua_pushinteger(L, (*level)->f75);
+		lua_pushinteger(L, level->f75);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F125_NAME)		// x = interface.level.f125
 	{
-		lua_pushinteger(L, (*level)->f125);
+		lua_pushinteger(L, level->f125);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F175_NAME)		// x = interface.level.f175
 	{
-		lua_pushinteger(L, (*level)->f175);
+		lua_pushinteger(L, level->f175);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F225_NAME)		// x = interface.level.f225
 	{
-		lua_pushinteger(L, (*level)->f225);
+		lua_pushinteger(L, level->f225);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_NAME)		// x = interface.level.f275
 	{
-		lua_pushinteger(L, (*level)->f275);
+		lua_pushinteger(L, level->f275);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F325_NAME)		// x = interface.level.f325
 	{
-		lua_pushinteger(L, (*level)->f325);
+		lua_pushinteger(L, level->f325);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else
@@ -359,38 +329,38 @@ int interface_arsGen_level_api_getField(lua_State *L) {
 int interface_arsGen_level_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto level = (InterfaceArsGenStruct::LevelStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
+	auto level = *((InterfaceArsGenStruct::LevelStruct **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL)));
 	std::string key = luaL_checkstring(L, 2);
 	uint16_t value = luaL_checkinteger(L, 3);
 
 	if (key == INTERFACE_ARS_F75_NAME)				// interface.level.f75 = x
 	{
-		(*level)->f75 = value;
+		level->f75 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F125_NAME)		// interface.level.f125 = x
 	{
-		(*level)->f125 = value;
+		level->f125 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F175_NAME)		// interface.level.f175 = x
 	{
-		(*level)->f175 = value;
+		level->f175 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F225_NAME)		// interface.level.f225 = x
 	{
-		(*level)->f225 = value;
+		level->f225 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_NAME)		// interface.level.f275 = x
 	{
-		(*level)->f275 = value;
+		level->f275 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F325_NAME)		// interface.level.f325 = x
 	{
-		(*level)->f325 = value;
+		level->f325 = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 
@@ -408,42 +378,42 @@ const struct luaL_Reg interface_arsGen_level_functions[] = {
 int interface_arsGen_gen_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto gen = (InterfaceArsGenMapType **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
+	auto gen = *((InterfaceArsGenMapType **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN)));
 	std::string key = luaL_checkstring(L, 2);
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.genX.f75
 	{
-		lua_pushinteger(L, (**gen)[F_075_HZ]);
+		lua_pushinteger(L, (*gen)[F_075_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F125_NAME)		// x = interface.genX.f125
 	{
-		lua_pushinteger(L, (**gen)[F_125_HZ]);
+		lua_pushinteger(L, (*gen)[F_125_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F175_NAME)		// x = interface.genX.f175
 	{
-		lua_pushinteger(L, (**gen)[F_175_HZ]);
+		lua_pushinteger(L, (*gen)[F_175_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F225_NAME)		// x = interface.genX.f225
 	{
-		lua_pushinteger(L, (**gen)[F_225_HZ]);
+		lua_pushinteger(L, (*gen)[F_225_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_NAME)		// x = interface.genX.f275
 	{
-		lua_pushinteger(L, (**gen)[F_275_HZ]);
+		lua_pushinteger(L, (*gen)[F_275_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F325_NAME)		// x = interface.genX.f325
 	{
-		lua_pushinteger(L, (**gen)[F_325_HZ]);
+		lua_pushinteger(L, (*gen)[F_325_HZ]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_AO_NAME)		// x = interface.genX.f275_ao
 	{
-		lua_pushinteger(L, (**gen)[F_275_HZ_AO]);
+		lua_pushinteger(L, (*gen)[F_275_HZ_AO]);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else
@@ -458,7 +428,7 @@ int interface_arsGen_gen_api_getField(lua_State *L) {
 int interface_arsGen_gen_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto gen = (InterfaceArsGenMapType **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
+	auto gen = *((InterfaceArsGenMapType **) luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN)));
 	std::string key = luaL_checkstring(L, 2);
 	uint8_t value;
 	if (lua_isinteger(L, 3))
@@ -468,37 +438,37 @@ int interface_arsGen_gen_api_setField(lua_State *L) {
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.genX.f75
 	{
-		(**gen)[F_075_HZ] = value;
+		(*gen)[F_075_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F125_NAME)		// x = interface.genX.f125
 	{
-		(**gen)[F_125_HZ] = value;
+		(*gen)[F_125_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F175_NAME)		// x = interface.genX.f175
 	{
-		(**gen)[F_175_HZ] = value;
+		(*gen)[F_175_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F225_NAME)		// x = interface.genX.f225
 	{
-		(**gen)[F_225_HZ] = value;
+		(*gen)[F_225_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_NAME)		// x = interface.genX.f275
 	{
-		(**gen)[F_275_HZ] = value;
+		(*gen)[F_275_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F325_NAME)		// x = interface.genX.f325
 	{
-		(**gen)[F_325_HZ] = value;
+		(*gen)[F_325_HZ] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 	else if (key == INTERFACE_ARS_F275_AO_NAME)		// x = interface.genX.f275_ao
 	{
-		(**gen)[F_275_HZ_AO] = value;
+		(*gen)[F_275_HZ_AO] = value;
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
 
@@ -517,131 +487,128 @@ const struct luaL_Reg interface_arsGen_gen_functions[] = {
  * @brief	Инициализация интерфейса генератора АРС
  * @note	На вершине стека должна быть таблица для записи в неё интерфейса (библиотека = таблица)
  */
-void interface_arsGen_init(lua_State *L) {
+void LuaLib_Interface::init_arsGen() {
 	// Стек: [..., <table: library>]
 
-	INTERFACE_ARS_GEN = {0, };
+	arsGen = {0, };
 
 	// ======================== Метатаблицы ========================
 
 	// Создание метатаблицы уровней частот АРС
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_arsGen_level_functions, 0);
+	luaL_setfuncs(luaState, interface_arsGen_level_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	// Создание метатаблицы управления генераторами АРС
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_arsGen_gen_functions, 0);
+	luaL_setfuncs(luaState, interface_arsGen_gen_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// =============================================================
 
 
 	// Создание таблицы полей генератора АРС
-	lua_createtable(L, 0, 3);
+	lua_createtable(luaState, 0, 3);
 	// +1 // Стек: [..., <table: library>, <table>]
 
 
 
 	// Добавление в стек названия таблицы уровней частот АРС
-	lua_pushstring(L, INTERFACE_ARS_GEN_LEVEL);
+	lua_pushstring(luaState, INTERFACE_ARS_GEN_LEVEL);
 	// +1 // Стек: [..., <table: library>, <table>, <string>]
 
 	// Создание таблицы уровней частот АРС
-	auto map = (void **) lua_newuserdata(L, sizeof(size_t));
-	*map = &INTERFACE_ARS_GEN.level;
+	auto map = (void **) lua_newuserdata(luaState, sizeof(size_t));
+	*map = &arsGen.level;
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Получение метатаблицы
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_ARS_GEN_LEVEL));
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в пользовательские данные
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Добавление в таблицу полей генератора АРС - таблицы уровней частот АРС
-	lua_settable(L, -3);
+	lua_settable(luaState, -3);
 	// -2 // Стек: [..., <table: library>, <table>]
 
 
 	// Добавление в стек названия таблицы состояния первого генератора
-	lua_pushstring(L, INTERFACE_ARS_GEN_GEN1);
+	lua_pushstring(luaState, INTERFACE_ARS_GEN_GEN1);
 	// +1 // Стек: [..., <table: library>, <table>, <string>]
 
 	// Создание таблицы уровней частот АРС
-	auto gen1 = (void **) lua_newuserdata(L, sizeof(size_t));
-	*gen1 = &INTERFACE_ARS_GEN.gen1;
+	auto gen1 = (void **) lua_newuserdata(luaState, sizeof(size_t));
+	*gen1 = &arsGen.gen1;
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Получение метатаблицы
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в пользовательские данные
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Добавление в таблицу полей генератора АРС - таблицы уровней частот АРС
-	lua_settable(L, -3);
+	lua_settable(luaState, -3);
 	// -2 // Стек: [..., <table: library>, <table>]
 
 
 	// Добавление в стек названия таблицы состояния первого генератора
-	lua_pushstring(L, INTERFACE_ARS_GEN_GEN2);
+	lua_pushstring(luaState, INTERFACE_ARS_GEN_GEN2);
 	// +1 // Стек: [..., <table: library>, <table>, <string>]
 
 	// Создание таблицы уровней частот АРС
-	auto gen2 = (void **) lua_newuserdata(L, sizeof(size_t));
-	*gen2 = &INTERFACE_ARS_GEN.gen2;
+	auto gen2 = (void **) lua_newuserdata(luaState, sizeof(size_t));
+	*gen2 = &arsGen.gen2;
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Получение метатаблицы
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_ARS_GEN_GEN));
 	// +1 // Стек: [..., <table: library>, <table>, <string>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в пользовательские данные
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <table>, <string>, <userdata>]
 
 	// Добавление в таблицу полей генератора АРС - таблицы уровней частот АРС
-	lua_settable(L, -3);
+	lua_settable(luaState, -3);
 	// -2 // Стек: [..., <table: library>, <table>]
 
 
 
 	// Установка таблицы уровней частот АРС как поля библиотеки
-	lua_setfield(L, -2, INTERFACE_ARS_GEN_NAME);
+	lua_setfield(luaState, -2, INTERFACE_ARS_GEN_NAME);
 	// -1 // Стек: [..., <table: library>]
 }
 
 
 // ------------------------------------------ Интерфейс настройки маппера CAN ------------------------------------------
 
-InterfaceCanMapperType		INTERFACE_CAN_MAPPER	= {};
-InterfaceCanInputType		INTERFACE_CAN_INPUT		= {};
-
 
 int interface_can_map_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
+	auto canUData = (InterfaceCanUData *)luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
 	uint32_t msgId = luaL_checkinteger(L, 2);
 	luaL_checktype(L, 3, LUA_TTABLE);
 
@@ -665,9 +632,9 @@ int interface_can_map_api_setField(lua_State *L) {
 		luaL_typeerror(L, 3, "mapper map field \"" INTERFACE_CAN_MAPPER_POSITION "\" is not a INTEGER.");
 	// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>, <int:pos>, <int:len>, <int:input>, <int:d>, <int:timeout>]
 
-	if (INTERFACE_CAN_MAPPER.count(msgId) == 0) {
+	if (canUData->canMapper->count(msgId) == 0) {
 		std::list<CanMapperNodeStruct> idMap;
-		INTERFACE_CAN_MAPPER[msgId] = idMap;
+		(*canUData->canMapper)[msgId] = idMap;
 	}
 
 	CanMapperNodeStruct map = {
@@ -676,11 +643,11 @@ int interface_can_map_api_setField(lua_State *L) {
 			.input = (uint8_t)lua_tointeger(L, 6),
 			.d = (uint8_t)lua_tointeger(L, 7),
 			.timeout = (uint16_t)lua_tointeger(L, 8),
-			.lastReceiveTime = 0
+			.lastRxTime = 0
 	};
 
-	INTERFACE_CAN_MAPPER[msgId].push_back(map);
-	INTERFACE_CAN_INPUT[map.input] = map.d;
+	(*canUData->canMapper)[msgId].push_back(map);
+	(*canUData->canInput)[map.input] = map.d;
 
 	return 0;
 }
@@ -692,16 +659,19 @@ const struct luaL_Reg interface_can_map_functions[] = {
 };
 
 
-int interface_can_input_api_setField(lua_State *L) {
+int interface_can_input_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
+	auto canUData = (InterfaceCanUData *)luaL_checkudata(L, 1, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
 	uint8_t key = luaL_checkinteger(L, 2);
 
-	auto it = INTERFACE_CAN_INPUT.find(key);
+	auto it = canUData->canInput->find(key);
 
-	if (it != INTERFACE_CAN_INPUT.end())
+	if (it != canUData->canInput->end())
 	{
+
+		// TODO: Проверка таймаута ожидания CAN сообщения
+
 		lua_pushinteger(L, it->second);
 		// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <number(return)>]
 	}
@@ -716,136 +686,142 @@ int interface_can_input_api_setField(lua_State *L) {
 
 // Функции взаимодействия с интерфейсом входов данных CAN
 const struct luaL_Reg interface_can_input_functions[] = {
-		{"__index", interface_can_input_api_setField},			// Запрос значения поля
+		{"__index", interface_can_input_api_getField},			// Запрос значения поля
 		{NULL, NULL}
 };
 
 
-void interface_can_init(lua_State *L) {
+void LuaLib_Interface::init_canMapper() {
 	// Стек: [..., <table: library>]
 
-
-	INTERFACE_CAN_INPUT.clear();
-	INTERFACE_CAN_MAPPER.clear();
-
+	canMapper.clear();
+	canInput.clear();
 
 	// ======================== Метатаблицы ========================
 
 	// Создание метатаблицы маппера CAN сообщений
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_can_map_functions, 0);
+	luaL_setfuncs(luaState, interface_can_map_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 	// Создание метатаблицы входов данных CAN
-	luaL_newmetatable(L, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
+	luaL_newmetatable(luaState, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface_can_input_functions, 0);
+	luaL_setfuncs(luaState, interface_can_input_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <userdata>, <metatable>]
 
 	// Удаление метатаблицы из стека
-	lua_pop(L, 1);
+	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
 
 	// =============================================================
 
 	// Создание таблицы полей контроллера CAN
-	lua_createtable(L, 0, 3);
+	lua_createtable(luaState, 0, 3);
 	// +1 // Стек: [..., <table: library>, <table>]
 
 
 	// Создание интерфейса маппера
-	lua_newuserdata(L, 0);
+	auto canUData = (InterfaceCanUData *) lua_newuserdata(luaState, sizeof(InterfaceCanUData));
+	canUData->canMapper = &canMapper;
+	canUData->canInput = &canInput;
 	// +1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 	// Получение метатаблицы
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_CAN_MAPPER_NAME));
 	// +1 // Стек: [..., <table: library>, <table>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в маппер
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 	// Установка маппера как поля контроллера CAN
-	lua_setfield(L, -2, INTERFACE_CAN_MAPPER_NAME);
+	lua_setfield(luaState, -2, INTERFACE_CAN_MAPPER_NAME);
 	// -1 // Стек: [..., <table: library>, <table>]
 
 
 	// Создание интерфейса CAN входов
-	lua_newuserdata(L, 0);
+	canUData = (InterfaceCanUData *) lua_newuserdata(luaState, sizeof(InterfaceCanUData));
+	canUData->canMapper = &canMapper;
+	canUData->canInput = &canInput;
 	// +1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 	// Получение метатаблицы
-	luaL_getmetatable(L, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
+	luaL_getmetatable(luaState, INTERFACE_NAME(INTERFACE_CAN_INPUT_NAME));
 	// +1 // Стек: [..., <table: library>, <table>, <userdata>, <metatable>]
 
 	// Установка метатаблицы в маппер
-	lua_setmetatable(L, -2);
+	lua_setmetatable(luaState, -2);
 	// -1 // Стек: [..., <table: library>, <table>, <userdata>]
 
 	// Установка интерфейса CAN входов как поля контроллера CAN
-	lua_setfield(L, -2, INTERFACE_CAN_INPUT_NAME);
+	lua_setfield(luaState, -2, INTERFACE_CAN_INPUT_NAME);
 	// -1 // Стек: [..., <table: library>, <table>]
 
 
 	// Установка контроллера CAN как поля библиотеки
-	lua_setfield(L, -2, INTERFACE_CAN_NAME);
+	lua_setfield(luaState, -2, INTERFACE_CAN_NAME);
 	// -1 // Стек: [..., <table: library>]
 }
 
 
+// ----------------------------------------------- Библиотека интерфейса -----------------------------------------------
 
 
-int luaopen_interface(lua_State *L) {
-	// Стек: [<string(arg1): lib name>]
+// Функции библиотеки
+const struct luaL_Reg interfaceLib_func[] = {
+		{NULL, NULL}
+};
 
-	// Создание библиотеки
-	luaL_newlib(L, interfaceLib_func);
+
+void LuaLib_Interface::InitLib(lua_State *L) {
+	// Стек: [...]
+
+	luaState = L;
+
+	LuaLib_CreateLib(luaState, INTERFACE_STR, interfaceLib_func);
 	// +1 // Стек: [..., <table: library>]
 
 	// Инициализация интерфейса генератора ТРЦ3
-	interface_trc3Gen_init(L);
+	init_trc3Gen();
 
 	// Инициализация интерфейса приёмников ТРЦ3
-	interface_trc3Rec_init(L);
+	init_trc3Rec();
 
 	// Инициализация интерфейса генератора АРС
-	interface_arsGen_init(L);
+	init_arsGen();
 
 	// Инициализация интерфейса маппера CAN сообщений
-	interface_can_init(L);
+	init_canMapper();
 
-	return 1;
+	lua_pop(L, 1);
+	// -1 // Стек: [...]
 }
 
 
-
-
-
-
-
-void interface_can_mapper_handle(CAN_Message *msg) {
+void LuaLib_Interface::CanHandler(CAN_Message *msg) {
 	uint64_t data = *((uint64_t *)msg->data);
 
-	auto mapperIt = INTERFACE_CAN_MAPPER.find(msg->ID);
+	auto mapIt = canMapper.find(msg->ID);
 
-	if (mapperIt == INTERFACE_CAN_MAPPER.end())
+	if (mapIt == canMapper.end())
 		return;
 
-	for (auto it = mapperIt->second.begin(); it != mapperIt->second.end(); it++) {
+	for (auto mapNodeIt = mapIt->second.begin(); mapNodeIt != mapIt->second.end(); mapNodeIt++) {
 
-		INTERFACE_CAN_INPUT[it->input] = (data >> it->pos) & ((1 << it->len) - 1);
-		it->lastReceiveTime = 0;
+		canInput[mapNodeIt->input] = (data >> mapNodeIt->pos) & ((1 << mapNodeIt->len) - 1);
+		mapNodeIt->lastRxTime = 0;
 
 		/*
 		printf("ID: %#010x\t"
@@ -854,174 +830,36 @@ void interface_can_mapper_handle(CAN_Message *msg) {
 			   "input: %d\t"
 			   "d: %d\t"
 			   "timeout: %d\t"
-			   "lastReceivedTime: %d\n", mapperIt->first, it->pos, it->len, it->input, it->d, it->timeout, it->lastReceiveTime);
+			   "lastReceivedTime: %d\n", mapperIt->first, it->pos, it->len, it->input, it->d, it->timeout, it->lastRxTime);
 		*/
 	}
 }
 
 
+void LuaLib_Interface::CanUpdateTimeouts() {
+	LUA_LIB_TIME_T _time = LuaLib_GetTime();
 
+	for (auto mapIt = canMapper.begin(); mapIt != canMapper.end(); mapIt++) {
+		auto mapNodeList = mapIt->second;
 
+		for (auto mapNodeIt = mapNodeList.begin(); mapNodeIt != mapNodeList.end(); mapNodeIt++) {
 
+			// Произошло переполнение переменной времени
+			if (mapNodeIt->lastRxTime > _time)
+				// Проверка таймаута ожидания CAN сообщения (с учётом переполнения переменной времени)
+				if (((LUA_LIB_MAX_TIME - mapNodeIt->lastRxTime) + _time) > mapNodeIt->timeout)
+					// Сброс входа к значению по-умолчанию
+					canInput[mapNodeIt->input] = mapNodeIt->d;
 
-
-
-
-
-/*
-	// Создание таблицы уровней частот АРС
-	lua_createtable(L, 0, CARRIER_FREQ_NUM_ARS);
-	// +1 // Стек: [..., <table: library>, <table>, <string>, <table>]
-
-	auto it = INTERFACE_ARS_CARRIER_NAMES.begin();
-	int i = 0;
-	for (; it != INTERFACE_ARS_CARRIER_NAMES.end(); it++) {
-		lua_pushstring(L, it->c_str());
-		// +1 // Стек: [..., <table: library>, <table>, <string>, <table>, <str:key>]
-		lua_pushinteger(L, i++);
-		// +1 // Стек: [..., <table: library>, <table>, <string>, <table>, <str:key>, <int:val>]
-		lua_rawset(L, -3);
-		// -1 // Стек: [..., <table: library>, <table>, <string>, <table>]
+			// Проверка таймаута ожидания CAN сообщения
+			else if ((_time - mapNodeIt->lastRxTime) > mapNodeIt->timeout)
+				// Сброс входа к значению по-умолчанию
+				canInput[mapNodeIt->input] = mapNodeIt->d;
+		}
 	}
-	*/
-
-
-typedef std::map<std::string, uint8_t>		MapType;
-
-static MapType INTERFACE_KTRC_MAP = {
-		{"ars.1.75",   0},
-		{"ars.1.125",  0},
-		{"ars.1.175",  0},
-		{"ars.1.225",  0},
-		{"ars.1.275",  0},
-		{"ars.1.325",  0},
-		{"ars.2.75",   0},
-		{"ars.2.125",  0},
-		{"ars.2.175",  0},
-		{"ars.2.225",  0},
-		{"ars.2.275",  0},
-		{"ars.2.325",  0},
-		{"ars.275_ao", 0},
-};
-
-
-static int lua_interface_getMap(lua_State *L) {
-
-	MapType **map = (MapType **)lua_newuserdata(L, sizeof(&INTERFACE_KTRC_MAP));
-	*map = &INTERFACE_KTRC_MAP;
-
-	luaL_getmetatable(L, "interface.map");
-	lua_setmetatable(L, -2);
-
-	return 1;
 }
 
 
-static int lua_interface_map_get(lua_State *L) {
-	// Стек: [<userdata(arg1)>, <key(arg2)>]
-
-	MapType **map = (MapType **) luaL_checkudata(L, 1, "interface.map");
-	const char *key = luaL_checkstring(L, 2);
-
-	if ((**map).count(key) != 0)
-		lua_pushinteger(L, (**map)[key]);
-	else
-		lua_pushinteger(L, 0);
-	// +1 // Стек: [<userdata(arg1)>, <key(arg2)>, <int(return)>]
-
-	return 1;	// Возвращаемых элементов - 1
-}
-
-
-static int lua_interface_map_set(lua_State *L) {
-	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
-
-	MapType **map = (MapType **) luaL_checkudata(L, 1, "interface.map");
-	const char *key = luaL_checkstring(L, 2);
-	uint8_t value = luaL_checkinteger(L, 3);
-
-	if ((**map).count(key) != 0)
-		(**map)[key] = value;
-
-	return 0;	// Возвращаемых элементов - 0
-}
-
-
-
-static const struct luaL_Reg interface2Lib_func[] = {
-		{NULL, NULL}
-};
-
-
-static const struct luaL_Reg interface2Lib_map_method[] = {
-		{"__index", lua_interface_map_get},			// Запрос значения поля
-		{"__newindex", lua_interface_map_set},		// Установка значения поля
-		{NULL, NULL}
-};
-
-
-
-static int luaopen_interface2 (lua_State *L) {
-	// Стек: [...]
-
-
-	// Создание библиотеки
-	luaL_newlib(L, interfaceLib_func);
-	// +1 // Стек: [..., <library>]
-
-	dumpstack(L);
-
-	// Создание пользовательских данных
-	MapType **map = (MapType **)lua_newuserdata(L, sizeof(size_t));
-	*map = &INTERFACE_KTRC_MAP;
-	// +1 // Стек: [..., <library>, <userdata>]
-
-	// Создание метатаблицы
-	luaL_newmetatable(L, "interface.map");
-	// +1 // Стек: [..., <library>, <userdata>, <metatable: "interface.map">]
-
-	// Установка функций метатаблицы
-	luaL_setfuncs(L, interface2Lib_map_method, 0);
-	// ~~ // Стек: [..., <library>, <userdata>, <metatable: "interface.map">]
-
-	// Установка метатаблицы в пользовательские данные
-	lua_setmetatable(L, -2);
-	// -1 // Стек: [..., <library>, <userdata>]
-
-	// Установка пользовательских данных как поле библиотеки
-	lua_setfield(L, -2, "stringg");
-	// -1 // Стек: [..., <library>]
-
-
-
-	/*
-	lua_createtable(L, 0, 0);
-	// +1 // Стек: [..., <library>, <table>]
-
-	auto it = INTERFACE_KTRC_MAP.begin();
-
-	for (; it != INTERFACE_KTRC_MAP.end(); it++) {
-		std::cout << "D: " << it->first << "\n";
-
-		lua_pushstring(L, it->first.c_str());
-		// +1 // Стек: [..., <library>, <table>, <str:key>]
-		lua_pushinteger(L, 99);
-		// +1 // Стек: [..., <library>, <table>, <str:key>, <int:val>]
-		lua_settable(L, -3);
-		// -1 // Стек: [..., <library>, <table>]
-	}
-
-	//lua_setfield(L, -2, "list");
-	lua_rawsetp(L, LUA_REGISTRYINDEX, (void *)&INTERFACE_KTRC_MAP);
-	// -1 // Стек: [..., <library>]
-
-	lua_rawgetp(L, LUA_REGISTRYINDEX, (void *)&INTERFACE_KTRC_MAP);
-	// +1 // Стек: [..., <table>]
-	*/
-
-
-	return 1;
-}
 
 
 void dumpstack (lua_State *L) {

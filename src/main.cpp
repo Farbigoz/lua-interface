@@ -19,8 +19,8 @@ extern "C" {
 #endif
 
 
-#include "lua_interface.h"
-#include "lua_defs.h"
+#include "ktrc/lua/lua_interface.h"
+#include "ktrc/lua/lua_defs.h"
 
 #include "ui_window.h"
 #include "main.h"
@@ -62,8 +62,8 @@ void do_lua() {
 	lua_State *L = luaL_newstate();
 	luaL_openlibs(L);
 
-	luaL_requiref(L, "interface", luaopen_interface, 1);
-	luaL_requiref(L, "defs", luaopen_defs, 1);
+	//LUA_INTERFACE.InitLib(L);
+	//LUA_DEFS.InitLib(L);
 
 	if (luaL_dostring(L, LUA_SCRIPT) != LUA_OK) {
 		std::cout << lua_tostring(L, -1) << "\n";
@@ -100,6 +100,12 @@ void do_lua() {
 }
 
 
+LUA_LIB_TIME_T _time = 0;
+LUA_LIB_TIME_T LuaLib_GetTime() {
+	return _time;
+}
+
+
 
 Ui_MainWindow	WINDOW;
 QTimer			LOOP_TIMER;
@@ -109,7 +115,10 @@ InputComments			INPUT_COMMENTS;
 
 
 
-static lua_State *LUA = nullptr;
+static lua_State	*LUA = nullptr;
+LuaLib_Interface	LUA_INTERFACE;
+LuaLib_Defs			LUA_DEFS;
+
 
 void lua_init() {
 	if (LUA != nullptr)
@@ -119,8 +128,11 @@ void lua_init() {
 
 	luaL_openlibs(LUA);
 
-	luaL_requiref(LUA, "interface", luaopen_interface, 1);
-	luaL_requiref(LUA, "defs", luaopen_defs, 1);
+	LUA_INTERFACE.InitLib(LUA);
+	LUA_DEFS.InitLib(LUA);
+
+	//luaL_requiref(LUA, "interface", luaopen_interface, 1);
+	//luaL_requiref(LUA, "defs", luaopen_defs, 1);
 }
 
 void lua_loadcode(const char *code) {
@@ -136,18 +148,32 @@ void lua_loadcode(const char *code) {
 }
 
 void lua_call_setup() {
+	std::string err = "";
+
 	lua_getglobal(LUA, "setup");  /* function to be called */
+
+	if (!lua_toboolean(LUA, -1)) {
+		luaI_print((err + "Error: not found \"setup()\" function\n").c_str(), -1);
+		return;
+	}
+
 	if (lua_pcall(LUA, 0, 0, 0) != 0) {
-		std::string err = "";
-		luaI_print((err + "Error: " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
+		luaI_print((err + "Error (setup): " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
 	}
 }
 
 void lua_call_loop() {
+	std::string err = "";
+
 	lua_getglobal(LUA, "loop");  /* function to be called */
+
+	if (!lua_toboolean(LUA, -1)) {
+		luaI_print((err + "Error: not found \"loop()\" function\n").c_str(), -1);
+		return;
+	}
+
 	if (lua_pcall(LUA, 0, 0, 0) != 0) {
-		std::string err = "";
-		luaI_print((err + "Error: " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
+		luaI_print((err + "Error (loop): " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
 	}
 }
 
@@ -340,25 +366,27 @@ void init_inputs_table() {
 	}
 
 	WINDOW.inputs->setRowCount(0);
-	WINDOW.inputs->setRowCount(INTERFACE_CAN_INPUT.size() + 2);
+	WINDOW.inputs->setRowCount(LUA_INTERFACE.canInput.size() + 2);
 
 	INPUT_LIST.clear();
 
+	int row = 0;
 
 	inNode.name = "trc3Rec[1].tc";
-	inNode.value = &INTERFACE_TRC3_REC.rec[0].tc;
+	inNode.value = &LUA_INTERFACE.trc3Rec.rec[0].tc;
 	inNode.isUnsignedNum = true;
-	inNode.numSize = sizeof(INTERFACE_TRC3_REC.rec[0].tc);
+	inNode.numSize = sizeof(LUA_INTERFACE.trc3Rec.rec[0].tc);
 	_set_inputs_table_node(&inNode, 0);
+	row++;
 
 	inNode.name = "trc3Rec[2].tc";
-	inNode.value = &INTERFACE_TRC3_REC.rec[1].tc;
+	inNode.value = &LUA_INTERFACE.trc3Rec.rec[1].tc;
 	inNode.isUnsignedNum = true;
-	inNode.numSize = sizeof(INTERFACE_TRC3_REC.rec[1].tc);
+	inNode.numSize = sizeof(LUA_INTERFACE.trc3Rec.rec[1].tc);
 	_set_inputs_table_node(&inNode, 1);
+	row++;
 
-	int row = 2;
-	for (auto it = INTERFACE_CAN_INPUT.begin(); it != INTERFACE_CAN_INPUT.end(); it++) {
+	for (auto it = LUA_INTERFACE.canInput.begin(); it != LUA_INTERFACE.canInput.end(); it++) {
 
 		inNode.name = "can.input[" + QString::number(it->first) + "]";
 		inNode.value = &it->second;
@@ -370,7 +398,7 @@ void init_inputs_table() {
 	}
 }
 
-void update_inputs() {
+void update_inputs_table() {
 	for (auto it = INPUT_LIST.begin(); it != INPUT_LIST.end(); it++) {
 		if (it->value != nullptr) {
 			if (it->isSignedNum)
@@ -438,7 +466,9 @@ void button_clearOutput() {
 }
 
 void timer_loop() {
-	update_inputs();
+	_time += WINDOW.cycleMs->value();
+
+	update_inputs_table();
 	lua_call_loop();
 	update_state_tree();
 }
