@@ -459,6 +459,8 @@ void button_reset() {
 
 	update_state_tree();
 	init_inputs_table();
+
+	_time = 0;
 }
 
 void button_clearOutput() {

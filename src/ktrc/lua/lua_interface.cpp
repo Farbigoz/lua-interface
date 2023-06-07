@@ -779,8 +779,15 @@ void LuaLib_Interface::init_canMapper() {
 // ----------------------------------------------- Библиотека интерфейса -----------------------------------------------
 
 
+int interface_api_timeFunc(lua_State *L) {
+	lua_pushinteger(L, LuaLib_GetTime());
+	return 1;
+}
+
+
 // Функции библиотеки
 const struct luaL_Reg interfaceLib_func[] = {
+		{"time", interface_api_timeFunc},
 		{NULL, NULL}
 };
 
