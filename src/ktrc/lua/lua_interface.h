@@ -7,7 +7,7 @@
 
 #include "ktrc/defs/ars.h"
 #include "ktrc/defs/trc3.h"
-#include "ktrc/defs/can.h"
+#include "ktrc/ktrcDefs.h"
 
 #include "lua_ulib.h"
 
