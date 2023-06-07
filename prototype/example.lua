@@ -47,6 +47,9 @@ function loop()
 
     x = x + 1
 
+    -- Текущее время в миллисекундах (время с момента запуска)
+    time = interface.time()
+
     -- print(inp[1])
     -- print(inp[2])
 end
