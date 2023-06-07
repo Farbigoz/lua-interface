@@ -120,64 +120,7 @@ LuaLib_Interface	LUA_INTERFACE;
 LuaLib_Defs			LUA_DEFS;
 
 
-void lua_init() {
-	if (LUA != nullptr)
-		lua_close(LUA);
-
-	LUA = luaL_newstate();
-
-	luaL_openlibs(LUA);
-
-	LUA_INTERFACE.InitLib(LUA);
-	LUA_DEFS.InitLib(LUA);
-
-	//luaL_requiref(LUA, "interface", luaopen_interface, 1);
-	//luaL_requiref(LUA, "defs", luaopen_defs, 1);
-}
-
-void lua_loadcode(const char *code) {
-	if (luaL_dostring(LUA, code) != LUA_OK) {
-		std::string err = "";
-		luaI_print((err + "Error: " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
-
-		return;
-	}
-
-	lua_gc(LUA, LUA_GCCOLLECT);
-	lua_gc(LUA, LUA_GCSTEP);
-}
-
-void lua_call_setup() {
-	std::string err = "";
-
-	lua_getglobal(LUA, "setup");  /* function to be called */
-
-	if (!lua_toboolean(LUA, -1)) {
-		luaI_print((err + "Error: not found \"setup()\" function\n").c_str(), -1);
-		return;
-	}
-
-	if (lua_pcall(LUA, 0, 0, 0) != 0) {
-		luaI_print((err + "Error (setup): " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
-	}
-}
-
-void lua_call_loop() {
-	std::string err = "";
-
-	lua_getglobal(LUA, "loop");  /* function to be called */
-
-	if (!lua_toboolean(LUA, -1)) {
-		luaI_print((err + "Error: not found \"loop()\" function\n").c_str(), -1);
-		return;
-	}
-
-	if (lua_pcall(LUA, 0, 0, 0) != 0) {
-		luaI_print((err + "Error (loop): " + lua_tostring(LUA, -1) + "\n").c_str(), -1);
-	}
-}
-
-void luaI_print(const char* c, size_t length) {
+void lua_stdout_hook(const char *c, size_t size) {
 	QString out = c;
 
 	WINDOW.output->moveCursor(QTextCursor::End);
@@ -185,6 +128,85 @@ void luaI_print(const char* c, size_t length) {
 	WINDOW.output->moveCursor(QTextCursor::End);
 
 	std::cout << out.toStdString().c_str();
+}
+
+
+/**
+ * @brief	Инициализация интерпретатора Lua
+ */
+void lua_init() {
+	// Удаление экземпляра интерпретатора
+	if (LUA != nullptr)
+		lua_close(LUA);
+
+	// Создание экземпляра интерпретатора
+	LUA = luaL_newstate();
+
+	// Подключение базовых библиотек Lua
+	luaL_openlibs(LUA);
+
+	// Добавление в экземпляр интерпретатора библиотеки-интерфейса
+	LUA_INTERFACE.InitLib(LUA);
+	// Добавление в экземпляр интерпретатора библиотеки-объявлений
+	LUA_DEFS.InitLib(LUA);
+}
+
+/**
+ * @brief	Загрузка кода в интерпретатор
+ *
+ * @param	code - загружаемый код
+ */
+void lua_loadcode(const char *code) {
+	std::string err = "";
+
+	if (luaL_dostring(LUA, code) != LUA_OK) {
+		err = err + "Error: " + lua_tostring(LUA, -1) + "\n";
+		lua_stdout_hook(err.c_str(), err.size());;
+
+		return;
+	}
+
+	// Вызов сборщика мусора
+	lua_gc(LUA, LUA_GCCOLLECT);
+	lua_gc(LUA, LUA_GCSTEP);
+}
+
+/**
+ * @brief	Вызов функции в Lua
+ *
+ * @note	Вызов только функций без параметров
+ *
+ * @param	func - вызываемая функция
+ */
+void lua_call_func(const char *func) {
+	std::string err = "";
+
+	lua_getglobal(LUA, func);
+
+	if (lua_isnil(LUA, -1)) {
+		err = err + "Error: not found \"" + func + "()\" function\n";
+		lua_stdout_hook(err.c_str(), err.size());
+		return;
+	}
+
+	if (lua_pcall(LUA, 0, 0, 0) != 0) {
+		err = err + "Error in \"" + func + "()\": " + lua_tostring(LUA, -1) + "\n";
+		lua_stdout_hook(err.c_str(), err.size());
+	}
+}
+
+/**
+ * @brief	Вызов функции "setup" в lua
+ */
+void lua_call_setup() {
+	lua_call_func("setup");
+}
+
+/**
+ * @brief	Вызов функции "loop" в lua
+ */
+void lua_call_loop() {
+	lua_call_func("loop");
 }
 
 
