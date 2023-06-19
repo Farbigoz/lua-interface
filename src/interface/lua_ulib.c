@@ -1,4 +1,4 @@
-#include "ktrc/lua/lua_ulib.h"
+#include "lua_ulib.h"
 
 
 
@@ -40,4 +40,32 @@ void LuaLib_CreateLib(lua_State *L, const char *name, const luaL_Reg *funcList) 
 	// Удаление из стека таблицы загруженных библиотек
 	lua_remove(L, -2);
 	// -1 // Стек: [..., <table: library>]
+}
+
+
+void LuaLib_GetLib(lua_State *L, const char *name) {
+	lua_getglobal(L, name);
+}
+
+
+
+void LuaLib_GetCreateTable(lua_State *L, const char *name) {
+	// Запрос поля "ktrc" у библиотеки
+	lua_getfield(L, -1, name);
+	// +1 // Стек: [..., <object>, <table: name>]
+
+	// Если поля "ktrc" у библиотеки нет - создание поля
+	if (lua_isnil(L, -1)) {
+		lua_pop(L, 1);
+		// -1 // Стек: [..., <object>,]
+
+		lua_createtable(L, 0, 0);
+		// +1 // Стек: [..., <object>, <table: name>]
+
+		lua_pushvalue(L, -1);
+		// +1 // Стек: [..., <object>, <table: name>, <table: name>]
+
+		lua_setfield(L, -3, name);
+		// -1 // Стек: [..., <object>, <table: name>]
+	}
 }

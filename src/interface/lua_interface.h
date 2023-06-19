@@ -4,16 +4,20 @@
 #include <stdint.h>
 #include <map>
 #include <list>
+#include <string>
 
-#include "ktrc/defs/ars.h"
-#include "ktrc/defs/trc3.h"
-#include "ktrc/ktrcDefs.h"
+#include "defs/ars.h"
+#include "defs/trc3.h"
+#include "ktrcDefs.h"
 
 #include "lua_ulib.h"
 
 
 #define INTERFACE_STR				"interface"
-#define INTERFACE_NAME(sname)		(INTERFACE_STR "." sname)
+
+#define INTERFACE_KTRC_STR			"ktrc"
+
+#define INTERFACE_MU_NAME			"mu"
 
 
 #define INTERFACE_TRC3_GEN_NAME		"trc3Gen"
@@ -54,20 +58,6 @@
 #define INTERFACE_CAN_MAPPER_INPUT		"inp"
 #define INTERFACE_CAN_MAPPER_DEFAULT	"d"
 #define INTERFACE_CAN_MAPPER_TIMEOUT	"timeout"
-
-
-
-
-static const std::list<std::string> INTERFACE_ARS_CARRIER_NAMES = {
-		INTERFACE_ARS_F75_NAME,
-		INTERFACE_ARS_F125_NAME,
-		INTERFACE_ARS_F175_NAME,
-		INTERFACE_ARS_F225_NAME,
-		INTERFACE_ARS_F275_NAME,
-		INTERFACE_ARS_F325_NAME,
-		INTERFACE_ARS_F275_AO_NAME,
-};
-
 
 
 
@@ -116,6 +106,7 @@ typedef struct {
 		uint8_t		f225;					///< Уровень частоты 225Гц в вольтах
 		uint8_t		f275;					///< Уровень частоты 275Гц в вольтах
 		uint8_t		f325;					///< Уровень частоты 325Гц в вольтах
+		uint8_t		f275_ao;				///< Уровень частоты 275Гц с АО в вольтах
 	} level;
 
 	InterfaceArsGenMapType		gen1;		///< Карта состояния генератора первой частоты
@@ -171,43 +162,150 @@ typedef std::map<uint32_t, std::list<CanMapperNodeStruct>>	InterfaceCanMapperTyp
 typedef std::map<uint8_t, uint8_t>							InterfaceCanInputType;
 
 
-typedef struct {
-	InterfaceCanMapperType		*canMapper;
-	InterfaceCanInputType		*canInput;
-} InterfaceCanUData;
+
+typedef std::map<uint8_t, InterfaceArsGenStruct>	InterfaceArsGenController;
 
 
 
 
-class LuaLib_Interface {
+/**
+ * @brief	Родительский класс Lua интерфейсов
+ */
+class _LuaInterface {
+protected:
+	lua_State	*luaState;
+
+public:
+	/**
+	 * @brief	Подключение интерфейса к таблице находящейся на вершине стека
+	 *
+	 * @param	L - Экземпляр интерпретатора Lua
+	 */
+	virtual void Connect(lua_State *L) { luaState = L; }
+};
+
+
+/**
+ * @brief	Lua библиотека-интерфейс
+ */
+class LuaInterfaceLib {
 private:
-	lua_State *luaState;
+	lua_State	*luaState;
 
-	void init_trc3Gen();
+public:
+	/**
+	 * @brief	Подключение библиотеки к рабочей среде
+	 *
+	 * @param	L - Экземпляр интерпретатора Lua
+	 */
+	void InitLib(lua_State *L);
 
-	void init_trc3Rec();
+	/**
+	 * @brief	Добавление интерфейса в библиотеку
+	 *
+	 * @note	Автоматически вызывает метод "Connect" класса "_LuaInterface"
+	 *
+	 * @param	interfaceInst - Экземпляр интерфейса
+	 */
+	void AddInterface(_LuaInterface *interfaceInst);
+};
 
-	void init_arsGen();
 
-	void init_canMapper();
+/**
+ * @brief	Интерфейс CAN маппера
+ */
+class LuaInterface_Can : public _LuaInterface {
+protected:
+	void connect_can();
+
+public:
+	InterfaceCanMapperType		canMapper;
+	InterfaceCanInputType		canInput;
+
+public:
+	void Connect(lua_State *L) {
+		_LuaInterface::Connect(L);
+
+		connect_can();
+	}
+
+	/**
+	 * @brief	Обработчик CAN сообщений
+	 * @param	msg - Указатель на сообщение
+	 */
+	void CanHandler(CAN_Message *msg);
+
+	/**
+	 * @brief	Обновление таймаутов, сброс значение к значениям по-умолчанию
+	 */
+	void CanUpdateTimeouts();
+};
+
+
+/**
+ * @brief	Интерфейс ТРЦ3 в КТРЦ
+ */
+class LuaInterface_Ktrc_Trc3 : public _LuaInterface {
+protected:
+	void connect_trc3Gen();
+
+	void connect_trc3Rec();
 
 public:
 	InterfaceTrc3GenStruct		trc3Gen;
 	InterfaceTrc3RecStruct		trc3Rec;
+
+public:
+	void Connect(lua_State *L) {
+		_LuaInterface::Connect(L);
+
+		connect_trc3Gen();
+		connect_trc3Rec();
+	}
+};
+
+
+/**
+ * @brief	Интерфейс АРС в КТРЦ
+ */
+class LuaInterface_Ktrc_Ars : public _LuaInterface {
+private:
+	void connect_arsGen();
+
+public:
 	InterfaceArsGenStruct		arsGen;
-	InterfaceCanMapperType		canMapper;
-	InterfaceCanInputType		canInput;
 
-	void InitLib(lua_State *L);
+public:
+	void Connect(lua_State *L) {
+		_LuaInterface::Connect(L);
 
-	void CanHandler(CAN_Message *msg);
+		connect_arsGen();
+	}
+};
 
-	void CanUpdateTimeouts();
+
+/**
+ * @brief	Интерфейс АРС в МУ
+ */
+class LuaInterface_Mu_Ars : public _LuaInterface {
+private:
+	void connect_arsGen();
+
+public:
+	InterfaceArsGenController	arsGen;
+
+public:
+	void Connect(lua_State *L) {
+		_LuaInterface::Connect(L);
+
+		connect_arsGen();
+	}
 };
 
 
 
 
+void dumpstack (lua_State *L);
 
 
 

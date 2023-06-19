@@ -1,9 +1,9 @@
 require "defs"
 require "interface"
 
-trc3Gen = interface.trc3Gen
-trc3Rec = interface.trc3Rec
-arsGen = interface.arsGen
+trc3Gen = interface.ktrc.trc3Gen
+trc3Rec = interface.ktrc.trc3Rec
+arsGen = interface.ktrc.arsGen
 
 mapper = interface.can.mapper
 inp = interface.can.input
@@ -28,9 +28,18 @@ function setup()
     trc3Gen.carrier = defs.F_565_HZ
     trc3Gen.mod = defs.F_8_HZ
 
+    -- Конфигурирование генератора АРС
+    arsGen.level.f75 = 90
+    arsGen.level.f125 = 95
+    arsGen.level.f175 = 100
+    arsGen.level.f225 = 105
+    arsGen.level.f275 = 110
+    arsGen.level.f325 = 115
+    arsGen.level.f275_ao = 120
+
     -- Конфигурирование маппера CAN сообщений
-    mapper[0x12345678] = {pos = 32, len = 2, inp = 1, d = 0, timeout = 200}
-    mapper[0x12345678] = {pos = 34, len = 2, inp = 2, d = 0, timeout = 200}
+    mapper[0x12345678] = {pos = 32, len = 2, inp = 1, d = 0, timeout = 200}     -- РЦ 1
+    mapper[0x12345678] = {pos = 34, len = 2, inp = 2, d = 0, timeout = 200}     -- РЦ 2
 
     print("setup done")
 end

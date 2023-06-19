@@ -42,6 +42,15 @@ LUA_LIB_TIME_T LuaLib_GetTime();
 void LuaLib_CreateLib(lua_State *L, const char *name, const luaL_Reg *funcList);
 
 
+void LuaLib_GetLib(lua_State *L, const char *name);
+
+
+/**
+ * @brief	Получить (если нет - создать) таблицу у объекта на вершине стека
+ */
+void LuaLib_GetCreateTable(lua_State *L, const char *name);
+
+
 #ifdef __cplusplus
 }
 #endif

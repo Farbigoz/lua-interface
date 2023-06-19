@@ -1,4 +1,4 @@
-#include "ktrc/lua/lua_defs.h"
+#include "lua_defs.h"
 
 
 // Функции библиотеки

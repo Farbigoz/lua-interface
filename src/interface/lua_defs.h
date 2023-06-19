@@ -4,8 +4,8 @@
 #include <string>
 #include <map>
 
-#include "ktrc/defs/trc3.h"
-#include "ktrc/defs/ars.h"
+#include "defs/trc3.h"
+#include "defs/ars.h"
 
 #include "lua_ulib.h"
 

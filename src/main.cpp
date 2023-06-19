@@ -19,8 +19,8 @@ extern "C" {
 #endif
 
 
-#include "ktrc/lua/lua_interface.h"
-#include "ktrc/lua/lua_defs.h"
+#include "interface/lua_interface.h"
+#include "interface/lua_defs.h"
 
 #include "ui_window.h"
 #include "main.h"
@@ -116,7 +116,14 @@ InputComments			INPUT_COMMENTS;
 
 
 static lua_State	*LUA = nullptr;
-LuaLib_Interface	LUA_INTERFACE;
+
+LuaInterfaceLib			LUA_INTERFACE_LIB;
+LuaInterface_Can		LUA_INTERFACE_CAN;
+LuaInterface_Ktrc_Trc3	LUA_INTERFACE_KTRC_TRC3;
+LuaInterface_Ktrc_Ars	LUA_INTERFACE_KTRC_ARS;
+
+
+//LuaLib_KtrcInterface	LUA_INTERFACE;
 LuaLib_Defs			LUA_DEFS;
 
 
@@ -145,8 +152,13 @@ void lua_init() {
 	// Подключение базовых библиотек Lua
 	luaL_openlibs(LUA);
 
+	LUA_INTERFACE_LIB.InitLib(LUA);
+	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_CAN);
+	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_KTRC_ARS);
+	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_KTRC_TRC3);
+
 	// Добавление в экземпляр интерпретатора библиотеки-интерфейса
-	LUA_INTERFACE.InitLib(LUA);
+	//LUA_INTERFACE.InitLib(LUA);
 	// Добавление в экземпляр интерпретатора библиотеки-объявлений
 	LUA_DEFS.InitLib(LUA);
 }
@@ -388,27 +400,27 @@ void init_inputs_table() {
 	}
 
 	WINDOW.inputs->setRowCount(0);
-	WINDOW.inputs->setRowCount(LUA_INTERFACE.canInput.size() + 2);
+	WINDOW.inputs->setRowCount(LUA_INTERFACE_CAN.canInput.size() + 2);
 
 	INPUT_LIST.clear();
 
 	int row = 0;
 
 	inNode.name = "trc3Rec[1].tc";
-	inNode.value = &LUA_INTERFACE.trc3Rec.rec[0].tc;
+	inNode.value = &LUA_INTERFACE_KTRC_TRC3.trc3Rec.rec[0].tc;
 	inNode.isUnsignedNum = true;
-	inNode.numSize = sizeof(LUA_INTERFACE.trc3Rec.rec[0].tc);
+	inNode.numSize = sizeof(LUA_INTERFACE_KTRC_TRC3.trc3Rec.rec[0].tc);
 	_set_inputs_table_node(&inNode, 0);
 	row++;
 
 	inNode.name = "trc3Rec[2].tc";
-	inNode.value = &LUA_INTERFACE.trc3Rec.rec[1].tc;
+	inNode.value = &LUA_INTERFACE_KTRC_TRC3.trc3Rec.rec[1].tc;
 	inNode.isUnsignedNum = true;
-	inNode.numSize = sizeof(LUA_INTERFACE.trc3Rec.rec[1].tc);
+	inNode.numSize = sizeof(LUA_INTERFACE_KTRC_TRC3.trc3Rec.rec[1].tc);
 	_set_inputs_table_node(&inNode, 1);
 	row++;
 
-	for (auto it = LUA_INTERFACE.canInput.begin(); it != LUA_INTERFACE.canInput.end(); it++) {
+	for (auto it = LUA_INTERFACE_CAN.canInput.begin(); it != LUA_INTERFACE_CAN.canInput.end(); it++) {
 
 		inNode.name = "can.input[" + QString::number(it->first) + "]";
 		inNode.value = &it->second;
