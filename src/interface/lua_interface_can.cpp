@@ -11,7 +11,19 @@ typedef struct {
 } InterfaceCanUData;
 
 
-
+/**
+ * @brief	Lua API функция установки CAN маппера
+ *
+ * @code	interface.can.mapper[CANid] = {pos = x1, len = x2, inp = x3, d = x4, timeout = x5}
+ *
+ * @param	L - экземпляр Lua
+ *
+ * @param	Lua_Стек[1] - Userdata "InterfaceCanUData"
+ * @param	Lua_Стек[2] - CAN id
+ * @param	Lua_Стек[3] - Таблица CAN маппера
+ *
+ * @return	nil
+ */
 int interface_can_map_api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
@@ -66,6 +78,18 @@ const struct luaL_Reg interface_can_map_functions[] = {
 };
 
 
+/**
+ * @brief	Lua API функция запроса входа CAN маппера
+ *
+ * @code	interface.can.input[n]
+ *
+ * @param	L - Экземпляр Lua
+ *
+ * @param	Lua_Стек[1] - Userdata "InterfaceCanUData"
+ * @param	Lua_Стек[2] - Номер входа
+ *
+ * @return	Lua_Стек[-1] - Состояние входа
+ */
 int interface_can_input_api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 

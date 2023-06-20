@@ -50,9 +50,9 @@ function loop()
     print("tick")
 
     -- Управление генератором АРС
-    arsGen.gen1.f75 = inp[1]
-    arsGen.gen1.f125 = not n2b(inp[2])
-    arsGen.gen2.f175 = x & 1
+    arsGen[1].f75 = inp[1]
+    arsGen[1].f125 = not n2b(inp[2])
+    arsGen[2].f175 = x & 1
 
     x = x + 1
 

@@ -18,7 +18,7 @@ void LuaInterfaceLib::InitLib(lua_State *L) {
 
 	luaState = L;
 
-	LuaLib_CreateLib(luaState, INTERFACE_STR, interface_lib_func);
+	LuaLib_CreateLib(luaState, INTERFACE_LIB_NAME, interface_lib_func);
 	// +1 // Стек: [..., <table: library>]
 
 	lua_pop(L, 1);
@@ -29,7 +29,7 @@ void LuaInterfaceLib::InitLib(lua_State *L) {
 void LuaInterfaceLib::AddInterface(_LuaInterface *interfaceInst) {
 	// Стек: [...]
 
-	LuaLib_GetLib(luaState, INTERFACE_STR);
+	LuaLib_GetLib(luaState, INTERFACE_LIB_NAME);
 	// +1 // Стек: [..., <table: library>]
 
 	interfaceInst->Connect(luaState);

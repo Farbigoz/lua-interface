@@ -1,19 +1,21 @@
 #include "lua_interface.h"
 
 
-#define LUA_METATABLE_TRC3_GEN		(INTERFACE_KTRC_STR "." INTERFACE_TRC3_GEN_NAME)
-#define LUA_METATABLE_TRC3_REC		(INTERFACE_KTRC_STR "." INTERFACE_TRC3_REC_NAME)
+#define LUA_METATABLE_TRC3_GEN		(INTERFACE_KTRC_NAME "." INTERFACE_TRC3_GEN_NAME)
+#define LUA_METATABLE_TRC3_REC		(INTERFACE_KTRC_NAME "." INTERFACE_TRC3_REC_NAME)
 
 
 /**
- * @brief	API функция запроса значения поля генератора ТРЦ3
+ * @brief	Lua API функция запроса значения поля генератора ТРЦ3
  *
- * @code	x = interface.ktrc.trc3.X
+ * @code	x = interface.ktrc.trc3Gen.FIELD
  *
- * @param	[1] = <userdata> - Интерфейс пользовательских данных
- * @param	[2] = <string>   - Название поля
+ * @param	L - Экземпляр Lua
  *
- * @return	[1] = <number>   - Значение поля
+ * @param	Lua_Стек[1] - Userdata "InterfaceTrc3GenStruct"
+ * @param	Lua_Стек[2] - Название поля
+ *
+ * @return	Lua_Стек[-1] - Значение поля
  */
 int interface_ktrc_trc3Gen__api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
@@ -46,15 +48,17 @@ int interface_ktrc_trc3Gen__api_getField(lua_State *L) {
 }
 
 /**
- * @brief	API функция установки значения поля генератора ТРЦ3
+ * @brief	Lua API функция установки значения поля генератора ТРЦ3
  *
- * @code	interface.ktrc.trc3.X = x
+ * @code	interface.ktrc.trc3Gen.FIELD = x
  *
- * @param	[1] = <userdata> - Интерфейс пользовательских данных
- * @param	[2] = <string>   - Название поля
- * @param	[3] = <number>   - Значение поля
+ * @param	L - Экземпляр Lua
  *
- * @return	<nil>
+ * @param	Lua_Стек[1] - Userdata "InterfaceTrc3GenStruct"
+ * @param	Lua_Стек[2] - Название поля
+ * @param	Lua_Стек[3] - Значение поля
+ *
+ * @return	nil
  */
 int interface_ktrc_trc3Gen__api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
@@ -108,8 +112,6 @@ void LuaInterface_Ktrc_Trc3::connect_trc3Gen() {
 	luaL_setfuncs(luaState, interface_trc3Gen_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <metatable>]
 
-	dumpstack(luaState);
-
 	// Удаление метатаблицы из стека
 	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
@@ -117,8 +119,8 @@ void LuaInterface_Ktrc_Trc3::connect_trc3Gen() {
 	// =============================================================
 
 
-	// Запрос поля "ktrc" у библиотеки
-	LuaLib_GetCreateTable(luaState, INTERFACE_KTRC_STR);
+	// Запрос таблицы "ktrc" у библиотеки
+	LuaLib_GetCreateTable(luaState, INTERFACE_KTRC_NAME);
 	// +1 // Стек: [..., <table: library>, <table: ktrc>]
 
 
@@ -150,14 +152,16 @@ void LuaInterface_Ktrc_Trc3::connect_trc3Gen() {
 
 
 /**
- * @brief	Callback API функция запроса значения поля приёмника ТРЦ3
+ * @brief	Lua API функция запроса значения поля приёмника ТРЦ3
  *
- * @code	x = interface.ktrc.trc3Rec[n].X
+ * @code	x = interface.ktrc.trc3Rec.FIELD
  *
- * @param	[1] = <userdata> - Интерфейс пользовательских данных
- * @param	[2] = <string>   - Название поля
+ * @param	L - Экземпляр Lua
  *
- * @return	[1] = <number>   - Значение поля
+ * @param	Lua_Стек[1] - Userdata "InterfaceTrc3GenStruct"
+ * @param	Lua_Стек[2] - Название поля
+ *
+ * @return	Lua_Стек[-1] - Значение поля
  */
 int interface_ktrc_trc3Rec__api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
@@ -195,15 +199,17 @@ int interface_ktrc_trc3Rec__api_getField(lua_State *L) {
 }
 
 /**
- * @brief	Callback API функция установки значения поля приёмника ТРЦ3
+ * @brief	Lua API функция установки значения поля приёмника ТРЦ3
  *
- * @code	interface.ktrc.trc3Rec[n].X = x
+ * @code	interface.ktrc.trc3Rec.FIELD = x
  *
- * @param	[1] = <userdata> - Интерфейс пользовательских данных
- * @param	[2] = <string>   - Название поля
- * @param	[3] = <number>   - Значение поля
+ * @param	L - Экземпляр Lua
  *
- * @return	<nil>
+ * @param	Lua_Стек[1] - Userdata "InterfaceTrc3GenStruct"
+ * @param	Lua_Стек[2] - Название поля
+ * @param	Lua_Стек[3] - Значение поля
+ *
+ * @return	nil
  */
 int interface_ktrc_trc3Rec__api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
@@ -263,8 +269,8 @@ void LuaInterface_Ktrc_Trc3::connect_trc3Rec() {
 	// =============================================================
 
 
-	// Запрос поля "ktrc" у библиотеки
-	LuaLib_GetCreateTable(luaState, INTERFACE_KTRC_STR);
+	// Запрос таблицы "ktrc" у библиотеки
+	LuaLib_GetCreateTable(luaState, INTERFACE_KTRC_NAME);
 	// +1 // Стек: [..., <table: library>, <table: ktrc>]
 
 

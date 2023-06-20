@@ -19,6 +19,7 @@ extern "C" {
 #endif
 
 
+
 #include "interface/lua_interface.h"
 #include "interface/lua_defs.h"
 
@@ -118,9 +119,13 @@ InputComments			INPUT_COMMENTS;
 static lua_State	*LUA = nullptr;
 
 LuaInterfaceLib			LUA_INTERFACE_LIB;
+
 LuaInterface_Can		LUA_INTERFACE_CAN;
+
 LuaInterface_Ktrc_Trc3	LUA_INTERFACE_KTRC_TRC3;
 LuaInterface_Ktrc_Ars	LUA_INTERFACE_KTRC_ARS;
+
+LuaInterface_Mu_Ktrc_Ars	LUA_INTERFACE_MU_KTRC_ARS;
 
 
 //LuaLib_KtrcInterface	LUA_INTERFACE;
@@ -156,6 +161,8 @@ void lua_init() {
 	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_CAN);
 	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_KTRC_ARS);
 	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_KTRC_TRC3);
+
+	LUA_INTERFACE_LIB.AddInterface(&LUA_INTERFACE_MU_KTRC_ARS);
 
 	// Добавление в экземпляр интерпретатора библиотеки-интерфейса
 	//LUA_INTERFACE.InitLib(LUA);

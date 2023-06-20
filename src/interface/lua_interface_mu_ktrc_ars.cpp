@@ -1,28 +1,40 @@
 #include "lua_interface.h"
 
 
-#define LUA_METATABLE_ARS_GEN_LEVEL		(INTERFACE_KTRC_NAME "." INTERFACE_ARS_GEN_NAME "." INTERFACE_ARS_GEN_LEVEL)
-#define LUA_METATABLE_ARS_GEN_GENX		(INTERFACE_KTRC_NAME "." INTERFACE_ARS_GEN_NAME "." INTERFACE_ARS_GEN_GEN)
+#define LUA_METATABLE_ARS_GEN_LEVEL		(INTERFACE_MU_NAME "." INTERFACE_ARS_GEN_NAME "." INTERFACE_ARS_GEN_LEVEL)
+#define LUA_METATABLE_ARS_GEN_GENX		(INTERFACE_MU_NAME "." INTERFACE_ARS_GEN_NAME "." INTERFACE_ARS_GEN_GEN)
+
+
+
+typedef struct {
+	void		*data;
+	uint8_t		*moduleNum;
+	uint8_t		genNum;
+} InterfaceMuKtrcArsUData;
 
 
 
 /**
  * @brief	Lua API функция запроса напряжения частоты генератора АРС
  *
- * @code	x = interface.ktrc.arsGen.level.FREQ
+ * @code	x = interface.mu.ktrc[NUM].arsGen.level.FREQ
  *
  * @param	L - Экземпляр Lua
  *
- * @param	Lua_Стек[1] - Userdata "InterfaceArsGenStruct::ArsLevelStruct"
+ * @param	Lua_Стек[1] - Userdata "InterfaceMuKtrcArsUData"
  * @param	Lua_Стек[2] - Название частоты
  *
  * @return	Lua_Стек[-1] - Напряжение
  */
-int interface_ktrc_arsGen_level__api_getField(lua_State *L) {
+int interface_mu_ktrc_arsGen_level__api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto level = *((InterfaceArsGenStruct::ArsLevelStruct **) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_LEVEL));
+	auto udata = (InterfaceMuKtrcArsUData *) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_LEVEL);
 	std::string key = luaL_checkstring(L, 2);
+
+	auto controller = (InterfaceArsGenController *)(udata->data);
+	auto level = &(*controller)[*udata->moduleNum].level;
+
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.level.f75
 	{
@@ -71,22 +83,25 @@ int interface_ktrc_arsGen_level__api_getField(lua_State *L) {
 /**
  * @brief	Lua API функция установки напряжения частоты генератора АРС
  *
- * @code	interface.ktrc.arsGen.level.FREQ = x
+ * @code	interface.mu.ktrc[NUM].arsGen.level.FREQ = x
  *
  * @param	L - Экземпляр Lua
  *
- * @param	Lua_Стек[1] - Userdata "InterfaceArsGenStruct::ArsLevelStruct"
+ * @param	Lua_Стек[1] - Userdata "InterfaceMuKtrcArsUData"
  * @param	Lua_Стек[2] - Название частоты
  * @param	Lua_Стек[3] - Напряжение
  *
  * @return	nil
  */
-int interface_ktrc_arsGen_level__api_setField(lua_State *L) {
+int interface_mu_ktrc_arsGen_level__api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto level = *((InterfaceArsGenStruct::ArsLevelStruct **) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_LEVEL));
+	auto udata = (InterfaceMuKtrcArsUData *) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_LEVEL);
 	std::string key = luaL_checkstring(L, 2);
 	uint16_t value = luaL_checkinteger(L, 3);
+
+	auto controller = (InterfaceArsGenController *)(udata->data);
+	auto level = &(*controller)[*udata->moduleNum].level;
 
 	if (key == INTERFACE_ARS_F75_NAME)				// interface.level.f75 = x
 	{
@@ -127,9 +142,9 @@ int interface_ktrc_arsGen_level__api_setField(lua_State *L) {
 }
 
 // Функции взаимодействия с интерфейсом приёмника ТРЦ3
-const struct luaL_Reg interface_ktrc_arsGen_level_functions[] = {
-		{"__index", interface_ktrc_arsGen_level__api_getField},			// Запрос значения поля
-		{"__newindex", interface_ktrc_arsGen_level__api_setField},		// Установка значения поля
+const struct luaL_Reg interface_mu_arsGen_level_functions[] = {
+		{"__index", interface_mu_ktrc_arsGen_level__api_getField},			// Запрос значения поля
+		{"__newindex", interface_mu_ktrc_arsGen_level__api_setField},		// Установка значения поля
 		{NULL, NULL}
 };
 
@@ -138,20 +153,23 @@ const struct luaL_Reg interface_ktrc_arsGen_level_functions[] = {
 /**
  * @brief	Lua API функция запроса состояния генератора частоты АРС
  *
- * @code	x = interface.ktrc.arsGen[n].FREQ
+ * @code	x = interface.mu.ktrc[NUM].arsGen[n].FREQ
  *
  * @param	L - Экземпляр Lua
  *
- * @param	Lua_Стек[1] - Userdata "InterfaceArsGenMapType"
+ * @param	Lua_Стек[1] - Userdata "InterfaceMuKtrcArsUData"
  * @param	Lua_Стек[2] - Название частоты
  *
  * @return	Lua_Стек[-1] - Состояние
  */
-int interface_ktrc_arsGen_gen__api_getField(lua_State *L) {
+int interface_mu_ktrc_arsGen_gen__api_getField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>]
 
-	auto gen = *((InterfaceArsGenMapType **) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_GENX));
+	auto udata = (InterfaceMuKtrcArsUData *) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_GENX);
 	std::string key = luaL_checkstring(L, 2);
+
+	auto controller = (InterfaceArsGenController *)(udata->data);
+	auto gen = &(*controller)[*udata->moduleNum].gen[udata->genNum];
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.genX.f75
 	{
@@ -200,26 +218,29 @@ int interface_ktrc_arsGen_gen__api_getField(lua_State *L) {
 /**
  * @brief	Lua API функция установки состояния генератора частоты АРС
  *
- * @code	interface.ktrc.arsGen[n].FREQ = x
+ * @code	interface.mu.ktrc[NUM].arsGen[n].FREQ = x
  *
  * @param	L - Экземпляр Lua
  *
- * @param	Lua_Стек[1] - Userdata "InterfaceArsGenMapType"
+ * @param	Lua_Стек[1] - Userdata "InterfaceMuKtrcArsUData"
  * @param	Lua_Стек[2] - Название частоты
  * @param	Lua_Стек[3] - Состояние
  *
  * @return	nil
  */
-int interface_ktrc_arsGen_gen__api_setField(lua_State *L) {
+int interface_mu_ktrc_arsGen_gen__api_setField(lua_State *L) {
 	// Стек: [<userdata(arg1)>, <key(arg2)>, <value(arg3)>]
 
-	auto gen = *((InterfaceArsGenMapType **) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_GENX));
+	auto udata = (InterfaceMuKtrcArsUData *) luaL_checkudata(L, 1, LUA_METATABLE_ARS_GEN_GENX);
 	std::string key = luaL_checkstring(L, 2);
 	uint8_t value;
 	if (lua_isinteger(L, 3))
 		value = lua_tointeger(L, 3) != 0;
 	else
 		value = lua_toboolean(L, 3);
+
+	auto controller = (InterfaceArsGenController *)(udata->data);
+	auto gen = &(*controller)[*udata->moduleNum].gen[udata->genNum];
 
 	if (key == INTERFACE_ARS_F75_NAME)				// x = interface.genX.f75
 	{
@@ -262,29 +283,25 @@ int interface_ktrc_arsGen_gen__api_setField(lua_State *L) {
 
 // Функции взаимодействия с интерфейсом приёмника ТРЦ3
 const struct luaL_Reg interface_arsGen_gen_functions[] = {
-		{"__index", interface_ktrc_arsGen_gen__api_getField},			// Запрос значения поля
-		{"__newindex", interface_ktrc_arsGen_gen__api_setField},		// Установка значения поля
+		{"__index", interface_mu_ktrc_arsGen_gen__api_getField},			// Запрос значения поля
+		{"__newindex", interface_mu_ktrc_arsGen_gen__api_setField},			// Установка значения поля
 		{NULL, NULL}
 };
 
 
-/**
- * @brief	Инициализация интерфейса генератора АРС
- * @note	На вершине стека должна быть таблица для записи в неё интерфейса (библиотека = таблица)
- */
-void LuaInterface_Ktrc_Ars::connect_arsGen() {
-	// Стек: [..., <table: library>]
 
-	arsGen = {0, };
+
+void LuaInterface_Mu_Ktrc_Ars::connect_arsGen() {
+
 
 	// ======================== Метатаблицы ========================
 
-	// Создание метатаблицы уровней частот АРС
+	// Создание метатаблицы КТРЦ
 	luaL_newmetatable(luaState, LUA_METATABLE_ARS_GEN_LEVEL);
 	// +1 // Стек: [..., <table: library>, <metatable>]
 
 	// Установка функций метатаблицы
-	luaL_setfuncs(luaState, interface_ktrc_arsGen_level_functions, 0);
+	luaL_setfuncs(luaState, interface_mu_arsGen_level_functions, 0);
 	// ~~ // Стек: [..., <table: library>, <metatable>]
 
 	// Удаление метатаблицы из стека
@@ -306,42 +323,60 @@ void LuaInterface_Ktrc_Ars::connect_arsGen() {
 	// -1 // Стек: [..., <table: library>]
 
 	// =============================================================
+	
 
 
-	// Запрос таблицы "ktrc" у библиотеки
+
+
+
+	// Запрос таблицы "mu" у библиотеки
+	LuaLib_GetCreateTable(luaState, INTERFACE_MU_NAME);
+	// +1 // Стек: [..., <table: library>, <table: mu>]
+
+	// Запрос таблицы "ktrc" у МУ
 	LuaLib_GetCreateTable(luaState, INTERFACE_KTRC_NAME);
-	// +1 // Стек: [..., <table: library>, <table: ktrc>]
+	// +1 // Стек: [..., <table: library>, <table: mu>, <table: ktrc>]
+
+	// Запрос таблицы "arsGen" у КТРЦ
+	LuaLib_GetCreateTable(luaState, INTERFACE_ARS_GEN_NAME);
+	// +1 // Стек: [..., <table: library>, <table: mu>, <table: ktrc>, <table: arsGen>]
+
+	// Удаление лишнего из стека
+	lua_remove(luaState, -2);
+	// -1 // Стек: [..., <table: library>, <table: mu>, <table: arsGen>]
+	lua_remove(luaState, -2);
+	// -1 // Стек: [..., <table: library>, <table: arsGen>]
 
 
-
-	// Создание таблицы полей генератора АРС
-	lua_createtable(luaState, 0, 3);
-	// +1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>]
 
 
 	// Создание таблицы уровней частот АРС
-	auto map = (void **) lua_newuserdata(luaState, sizeof(size_t));
-	*map = &arsGen.level;
-	// +1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>, <userdata: level>]
+	auto map = (InterfaceMuKtrcArsUData *) lua_newuserdata(luaState, sizeof(InterfaceMuKtrcArsUData));
+	map->data = &arsGen;
+	map->moduleNum = selectedKtrc;
+	// +1 // Стек: [..., <table: library>, <table: arsGen>, <userdata: level>]
 
 	// Получение метатаблицы
 	luaL_getmetatable(luaState, LUA_METATABLE_ARS_GEN_LEVEL);
-	// +1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>, <userdata: level>, <metatable>]
+	// +1 // Стек: [..., <table: library>, <table: arsGen>, <userdata: level>, <metatable>]
 
 	// Установка метатаблицы в пользовательские данные
 	lua_setmetatable(luaState, -2);
-	// -1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>, <userdata: level>]
+	// -1 // Стек: [..., <table: library>, <table: arsGen>, <userdata: level>]
 
 	// Добавление в таблицу полей генератора АРС - таблицы уровней частот АРС
 	lua_setfield(luaState, -2, INTERFACE_ARS_GEN_LEVEL);
-	// -1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>]
+	// -2 // Стек: [..., <table: library>, <table: arsGen>]
+
 
 
 	// Добавление генераторов АРС
-	for (int i = 0; i < 2; i++) {
+	for (int i = 0; i < ARS_GEN_COUNT; i++) {
 		// Создание таблицы уровней частот АРС
-		auto gen1 = (void **) lua_newuserdata(luaState, sizeof(size_t));
-		*gen1 = &arsGen.gen[i];
+		auto gen = (InterfaceMuKtrcArsUData *) lua_newuserdata(luaState, sizeof(InterfaceMuKtrcArsUData));
+		gen->data = &arsGen;
+		gen->moduleNum = selectedKtrc;
+		gen->genNum = i;
 		// +1 // Стек: [..., <table: library>, <table: ktrc>, <table: arsGen>, <userdata: gen[i]>]
 
 		// Получение метатаблицы
@@ -357,11 +392,9 @@ void LuaInterface_Ktrc_Ars::connect_arsGen() {
 		// -1 // Стек: [..., <table: library>, <table: ktrc>,  <table: arsGen>]
 	}
 
-
-	// Установка таблицы уровней частот АРС как поля библиотеки
-	lua_setfield(luaState, -2, INTERFACE_ARS_GEN_NAME);
-	// -1 // Стек: [..., <table: library>, <table: ktrc>]
-
 	lua_pop(luaState, 1);
 	// -1 // Стек: [..., <table: library>]
+
 }
+
+

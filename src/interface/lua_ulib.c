@@ -50,11 +50,11 @@ void LuaLib_GetLib(lua_State *L, const char *name) {
 
 
 void LuaLib_GetCreateTable(lua_State *L, const char *name) {
-	// Запрос поля "ktrc" у библиотеки
+	// Запрос таблицы "name" у объекта
 	lua_getfield(L, -1, name);
 	// +1 // Стек: [..., <object>, <table: name>]
 
-	// Если поля "ktrc" у библиотеки нет - создание поля
+	// Если таблицы "name" у объекта нет - создание таблицы
 	if (lua_isnil(L, -1)) {
 		lua_pop(L, 1);
 		// -1 // Стек: [..., <object>,]

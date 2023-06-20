@@ -170,48 +170,48 @@ StateTreeNode			stateTreeNode_trc3Rec = {
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f75 = {
 				.name = "f75",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_075_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f75,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_075_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f75)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f125 = {
 				.name = "f125",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_125_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f125,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_125_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f125)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f175 = {
 				.name = "f175",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_175_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f175,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_175_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f175)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f225 = {
 				.name = "f225",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_225_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f225,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_225_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f225)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f275 = {
 				.name = "f275",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_275_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f275,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_275_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f275)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f325 = {
 				.name = "f325",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_325_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f325,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_325_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f325)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen1_f275_ao = {
 				.name = "f275_ao",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_275_HZ_AO],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f275_ao,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen1[F_275_HZ_AO])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[0].f275_ao)};
 
 	StateTreeNode			stateTreeNode_arsGen_gen1 = {
-			.name = "gen1",
+			.name = "[1]",
 			.value = nullptr,
 			.children = {
 					&stateTreeNode_arsGen_gen1_f75,
@@ -225,48 +225,48 @@ StateTreeNode			stateTreeNode_trc3Rec = {
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f75 = {
 				.name = "f75",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_075_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f75,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_075_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f75)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f125 = {
 				.name = "f125",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_125_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f125,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_125_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f125)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f175 = {
 				.name = "f175",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_175_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f175,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_175_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f175)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f225 = {
 				.name = "f225",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_225_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f225,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_225_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f225)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f275 = {
 				.name = "f275",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_275_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f275,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_275_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f275)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f325 = {
 				.name = "f325",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_325_HZ],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f325,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_325_HZ])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f325)};
 
 		StateTreeNode			stateTreeNode_arsGen_gen2_f275_ao = {
 				.name = "f275_ao",
-				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_275_HZ_AO],
+				.value = &LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f275_ao,
 				.isUnsignedNum = true,
-				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen2[F_275_HZ_AO])};
+				.numSize = sizeof(LUA_INTERFACE_KTRC_ARS.arsGen.gen[1].f275_ao)};
 
 	StateTreeNode			stateTreeNode_arsGen_gen2 = {
-			.name = "gen2",
+			.name = "[2]",
 			.value = nullptr,
 			.children = {
 					&stateTreeNode_arsGen_gen2_f75,

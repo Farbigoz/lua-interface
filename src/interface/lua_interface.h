@@ -13,9 +13,9 @@
 #include "lua_ulib.h"
 
 
-#define INTERFACE_STR				"interface"
+#define INTERFACE_LIB_NAME			"interface"
 
-#define INTERFACE_KTRC_STR			"ktrc"
+#define INTERFACE_KTRC_NAME			"ktrc"
 
 #define INTERFACE_MU_NAME			"mu"
 
@@ -59,15 +59,22 @@
 #define INTERFACE_CAN_MAPPER_DEFAULT	"d"
 #define INTERFACE_CAN_MAPPER_TIMEOUT	"timeout"
 
-
+#pragma pack(1)
 
 /**
  * @brief	Структура интерфейса генератора ТРЦ3
  */
 typedef struct {
+#if defined(LUA_INTERFACE_OPTIMIZE_STRUCTS)
+	uint8_t			level;				///< Уровень занятия РЦ в миливольтах
+	uint8_t			carrier		:3;		///< Номер несущей частоты
+	uint8_t			mod			:2;		///< Номер модуляции
+	uint8_t						:3;
+#else
 	uint8_t			level;					///< Уровень генерации в вольтах
 	TTrc3FreqNum	carrier;				///< Номер несущей частоты
 	TTrc3ModFreqNum	mod;					///< Номер модуляции
+#endif
 } InterfaceTrc3GenStruct;
 
 
@@ -79,18 +86,45 @@ typedef struct {
 	 * @brief	Структура интерфейса приёмника ТРЦ3
 	 */
 	struct RecStruct {
+#if defined(LUA_INTERFACE_OPTIMIZE_STRUCTS)
+		uint8_t			level;				///< Уровень занятия РЦ в миливольтах
+		uint8_t			carrier		:3;		///< Номер несущей частоты
+		uint8_t			mod			:2;		///< Номер модуляции
+		uint8_t			tc			:1;		///< Состояние свободности РЦ (true = свободна, false = занята)
+		uint8_t						:2;
+#else
 		uint8_t			level;				///< Уровень занятия РЦ в миливольтах
 		TTrc3FreqNum	carrier;			///< Номер несущей частоты
 		TTrc3ModFreqNum	mod;				///< Номер модуляции
 
 		bool			tc;					///< Состояние свободности РЦ (true = свободна, false = занята)
-	} rec[2];
+#endif
+	} rec[TRC3_REC_COUNT];
 } InterfaceTrc3RecStruct;
 
 
 //typedef std::map	<TArsFreqNum, bool> InterfaceArsGenMapType;
 
-typedef bool		InterfaceArsGenMapType[F_ARS_COUNT];
+typedef struct ArsGenStruct {
+#if defined(LUA_INTERFACE_OPTIMIZE_STRUCTS)
+	uint8_t		f75		: 1;			///< Уровень частоты 75Гц в вольтах
+	uint8_t		f125	: 1;			///< Уровень частоты 125Гц в вольтах
+	uint8_t		f175	: 1;			///< Уровень частоты 175Гц в вольтах
+	uint8_t		f225	: 1;			///< Уровень частоты 225Гц в вольтах
+	uint8_t		f275	: 1;			///< Уровень частоты 275Гц в вольтах
+	uint8_t		f325	: 1;			///< Уровень частоты 325Гц в вольтах
+	uint8_t		f275_ao	: 1;			///< Уровень частоты 275Гц с АО в вольтах
+	uint8_t				: 1;
+#else
+	uint8_t		f75;					///< Уровень частоты 75Гц в вольтах
+	uint8_t		f125;					///< Уровень частоты 125Гц в вольтах
+	uint8_t		f175;					///< Уровень частоты 175Гц в вольтах
+	uint8_t		f225;					///< Уровень частоты 225Гц в вольтах
+	uint8_t		f275;					///< Уровень частоты 275Гц в вольтах
+	uint8_t		f325;					///< Уровень частоты 325Гц в вольтах
+	uint8_t		f275_ao;				///< Уровень частоты 275Гц с АО в вольтах
+#endif
+} InterfaceArsGenMapType;
 
 /**
  * @brief	Структура интерфейса генератора АРС
@@ -99,7 +133,7 @@ typedef struct {
 	/**
 	 * @brief	Уровни каждой частоты
 	 */
-	struct LevelStruct{
+	struct ArsLevelStruct {
 		uint8_t		f75;					///< Уровень частоты 75Гц в вольтах
 		uint8_t		f125;					///< Уровень частоты 125Гц в вольтах
 		uint8_t		f175;					///< Уровень частоты 175Гц в вольтах
@@ -109,10 +143,7 @@ typedef struct {
 		uint8_t		f275_ao;				///< Уровень частоты 275Гц с АО в вольтах
 	} level;
 
-	InterfaceArsGenMapType		gen1;		///< Карта состояния генератора первой частоты
-	InterfaceArsGenMapType		gen2;		///< Карта состояния генератора второй частоты
-	//bool			gen1[F_ARS_COUNT];
-	//bool			gen2[F_ARS_COUNT];
+	InterfaceArsGenMapType gen[ARS_GEN_COUNT];
 } InterfaceArsGenStruct;
 
 
@@ -149,6 +180,7 @@ typedef struct {
 	LUA_LIB_TIME_T		lastRxTime;			///< Время последнего получения сообщения
 } CanMapperNodeStruct;
 
+#pragma pack()
 
 /**
  * @brief	Тип данных интерфейса маппера CAN сообщений
@@ -236,7 +268,7 @@ public:
 	void CanHandler(CAN_Message *msg);
 
 	/**
-	 * @brief	Обновление таймаутов, сброс значение к значениям по-умолчанию
+	 * @brief	Обновление таймаутов, сброс значений к значениям по-умолчанию
 	 */
 	void CanUpdateTimeouts();
 };
@@ -284,10 +316,26 @@ public:
 };
 
 
+class LuaInterface_Mu_Ktrc : public _LuaInterface {
+protected:
+	uint8_t		*selectedKtrc;
+
+private:
+	void connect_ktrc();
+
+public:
+	void Connect(lua_State *L) {
+		_LuaInterface::Connect(L);
+
+		connect_ktrc();
+	}
+};
+
+
 /**
  * @brief	Интерфейс АРС в МУ
  */
-class LuaInterface_Mu_Ars : public _LuaInterface {
+class LuaInterface_Mu_Ktrc_Ars : public LuaInterface_Mu_Ktrc {
 private:
 	void connect_arsGen();
 
@@ -296,7 +344,7 @@ public:
 
 public:
 	void Connect(lua_State *L) {
-		_LuaInterface::Connect(L);
+		LuaInterface_Mu_Ktrc::Connect(L);
 
 		connect_arsGen();
 	}

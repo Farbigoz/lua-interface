@@ -35,7 +35,7 @@ list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/onelua.c")    
 # Исключение библиотек
 list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/lutf8lib.c")  # Отключение библиотеки utf8
 list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/ltablib.c")   # Отключение библиотеки работы с таблицами
-list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/lstrlib.c")   # Отключение библиотеки работы с строками
+#list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/lstrlib.c")   # Отключение библиотеки работы с строками
 list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/loslib.c")    # Отключение библиотеки работы с ОС
 list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/lmathlib.c")  # Отключение библиотеки матем. функций
 list(REMOVE_ITEM private_sources "${CMAKE_CURRENT_SOURCE_DIR}/lua/liolib.c")    # Отключение библиотеки IO

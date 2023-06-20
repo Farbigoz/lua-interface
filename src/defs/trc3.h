@@ -8,6 +8,8 @@
 #ifndef TRC3_CARRIERS_DEF
 #define TRC3_CARRIERS_DEF
 
+#define TRC3_REC_COUNT			2
+
 /// Количество несущих частот ТРЦ3
 #define CARRIER_FREQ_NUM_TRC3	5
 

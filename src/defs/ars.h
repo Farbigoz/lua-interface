@@ -8,6 +8,8 @@
 #ifndef ARS_CARRIERS_DEF
 #define ARS_CARRIERS_DEF
 
+#define ARS_GEN_COUNT			2
+
 /// Число несущих частот АРС
 #define CARRIER_FREQ_NUM_ARS	7
 
