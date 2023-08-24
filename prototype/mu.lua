@@ -1,29 +1,33 @@
 require "defs"
 require "interface"
 
-ktrc = interface.mu.ktrc
+-- Получение интерфейсов
+ktrc = interface.mu.ktrc            -- Интерфейс управления КТРЦ
 
-mapper = interface.can.mapper
-inp = interface.can.input
+mapper = interface.can.mapper       -- Интерфейс CAN маппера
+inp = interface.can.input           -- Интерфейс входов CAN маппера
 
 
 function b2n(b) return b and 1 or 0 end     -- bool to num
 function n2b(n) return n ~= 0 end           -- num to bool
 
 
+-- Функция инициализации (Вызывается 1 раз)
 function setup()
     -- Конфигурирование маппера CAN сообщений
+    -- Пример:
+    --    Айди CAN сообщения КТРЦ под номером 10 = 0x12345678
+    --    Состояние 1 РЦ занимает 2 бита, которые находятся в позиции 32
     mapper[0x12345678] = {pos = 32, len = 2, inp = 1, d = 0, timeout = 200}     -- РЦ 1
+    --    Состояние 2 РЦ занимает 2 бита, которые находятся в позиции 34
     mapper[0x12345678] = {pos = 34, len = 2, inp = 2, d = 0, timeout = 200}     -- РЦ 2
-
-    print("setup done")
+    --    d - Значение по-умолчанию, которое будет установлено, если от КТРЦ не поступало сообщений в течении "timeout" мс
+    --    inp - Номер входа, в который будет записано значение (Значение будет записано в interface.can.input[inp])
 end
 
 
-
+-- Функция обработки (Вызывается циклически)
 function loop()
-    print("tick")
-
     -- Управление кодированием первого КТРЦ
     ktrc[0].arsGen[1].f75 = inp[1]
     ktrc[0].arsGen[1].f125 = not n2b(inp[2])

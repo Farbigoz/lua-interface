@@ -37,9 +37,7 @@
 
 #define INTERFACE_ARS_GEN_NAME		"arsGen"
 #define INTERFACE_ARS_GEN_LEVEL		"level"			// arsGen.level
-#define INTERFACE_ARS_GEN_GEN		"gen"			// arsGen.gen1
-#define INTERFACE_ARS_GEN_GEN1		"gen1"			// arsGen.gen1
-#define INTERFACE_ARS_GEN_GEN2		"gen2"			// arsGen.gen2
+#define INTERFACE_ARS_GEN_GEN		"gen"			// arsGen.gen
 
 #define INTERFACE_ARS_F75_NAME		"f75"
 #define INTERFACE_ARS_F125_NAME		"f125"
