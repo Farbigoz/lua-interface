@@ -1,10 +1,6 @@
-[submodule "third_party/lua/lua"]
-	path = lua/lua
-	url = https://github.com/Farbigoz/lua.git
 [submodule "third_party/QSourceHighlite"]
 	path = gui_app/QSourceHighlite
 	url = https://github.com/Waqar144/QSourceHighlite.git
-
 [submodule "gui_app/hardware_interface"]
 	path = gui_app/hardware_interface
 	url = git@gitlab.npcprom.ru:abtci/hardware_interface.git
