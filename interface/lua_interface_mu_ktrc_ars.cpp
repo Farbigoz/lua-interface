@@ -371,7 +371,7 @@ void LuaInterface_Mu_Ktrc_Ars::connect_arsGen() {
 
 
 	// Добавление генераторов АРС
-	for (int i = 0; i < ARS_GEN_COUNT; i++) {
+	for (int i = 0; i < ARS_GEN_NUM; i++) {
 		// Создание таблицы уровней частот АРС
 		auto gen = (InterfaceMuKtrcArsUData *) lua_newuserdata(luaState, sizeof(InterfaceMuKtrcArsUData));
 		gen->data = &arsGen;

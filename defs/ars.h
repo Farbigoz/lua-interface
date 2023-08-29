@@ -8,10 +8,11 @@
 #ifndef ARS_CARRIERS_DEF
 #define ARS_CARRIERS_DEF
 
-#define ARS_GEN_COUNT			2
+/// Количество генераторов АРС
+#define ARS_GEN_NUM			2
 
 /// Число несущих частот АРС
-#define CARRIER_FREQ_NUM_ARS	7
+#define ARS_CARRIER_NUM		7
 
 /// Частоты несущей АРС
 typedef enum
@@ -27,9 +28,9 @@ typedef enum
 	F_ARS_COUNT,
 
 	F_WRONG = 0x7
-} TArsFreqNum;
+} TArsCarrier;
 
-const uint16_t ArsFreq[CARRIER_FREQ_NUM_ARS] = {75, 125, 175, 225, 275, 325, 275};
+const uint16_t ArsCarrierFreq[ARS_CARRIER_NUM] = {75, 125, 175, 225, 275, 325, 275};
 
 
 #define ARS_275_AO_PERIOD			1.65		// 1.5 - 1.8

@@ -6,9 +6,9 @@
 #include <list>
 #include <string>
 
-#include "defs/ars.h"
-#include "defs/trc3.h"
-#include "ktrcDefs.h"
+#include "ars.h"
+#include "trc3.h"
+#include "hardware_interface.h"
 
 #include "lua_ulib.h"
 
@@ -70,8 +70,8 @@ typedef struct {
 	uint8_t						:3;
 #else
 	uint8_t			level;					///< Уровень генерации в вольтах
-	TTrc3FreqNum	carrier;				///< Номер несущей частоты
-	TTrc3ModFreqNum	mod;					///< Номер модуляции
+	TTrc3Carrier	carrier;				///< Номер несущей частоты
+	TTrc3Mod	mod;					///< Номер модуляции
 #endif
 } InterfaceTrc3GenStruct;
 
@@ -92,8 +92,8 @@ typedef struct {
 		uint8_t						:2;
 #else
 		uint8_t			level;				///< Уровень занятия РЦ в миливольтах
-		TTrc3FreqNum	carrier;			///< Номер несущей частоты
-		TTrc3ModFreqNum	mod;				///< Номер модуляции
+		TTrc3Carrier	carrier;			///< Номер несущей частоты
+		TTrc3Mod	mod;				///< Номер модуляции
 
 		bool			tc;					///< Состояние свободности РЦ (true = свободна, false = занята)
 #endif
@@ -141,7 +141,7 @@ typedef struct {
 		uint8_t		f275_ao;				///< Уровень частоты 275Гц с АО в вольтах
 	} level;
 
-	InterfaceArsGenMapType gen[ARS_GEN_COUNT];
+	InterfaceArsGenMapType gen[ARS_GEN_NUM];
 } InterfaceArsGenStruct;
 
 

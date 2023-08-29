@@ -20,8 +20,8 @@ extern "C" {
 
 
 
-#include "interface/lua_interface.h"
-#include "interface/lua_defs.h"
+#include "lua_interface.h"
+#include "lua_defs.h"
 
 #include "ui_window.h"
 #include "main.h"

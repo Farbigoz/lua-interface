@@ -1,6 +1,6 @@
 #include "main.h"
 
-#include "interface/lua_interface.h"
+#include "lua_interface.h"
 
 extern LuaInterface_Can			LUA_INTERFACE_CAN;
 extern LuaInterface_Ktrc_Trc3	LUA_INTERFACE_KTRC_TRC3;

@@ -74,12 +74,12 @@ int interface_ktrc_trc3Gen__api_setField(lua_State *L) {
 	else if (key == INTERFACE_TRC3_GEN_CARRIER)		// interface.carrier = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		trc3Gen->carrier = (TTrc3FreqNum)value;
+		trc3Gen->carrier = (TTrc3Carrier)value;
 	}
 	else if (key == INTERFACE_TRC3_GEN_MOD)			// interface.mod = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		trc3Gen->mod = (TTrc3ModFreqNum)value;
+		trc3Gen->mod = (TTrc3Mod)value;
 
 	}
 
@@ -225,12 +225,12 @@ int interface_ktrc_trc3Rec__api_setField(lua_State *L) {
 	else if (key == INTERFACE_TRC3_REC_CARRIER)		// interface[i].carrier = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		trc3Rec->carrier = (TTrc3FreqNum)value;
+		trc3Rec->carrier = (TTrc3Carrier)value;
 	}
 	else if (key == INTERFACE_TRC3_REC_MOD)			// interface[i].mod = x
 	{
 		uint8_t value = luaL_checkinteger(L, 3);
-		trc3Rec->mod = (TTrc3ModFreqNum)value;
+		trc3Rec->mod = (TTrc3Mod)value;
 	}
 
 	return 0;	// Возвращаемых элементов - 0
